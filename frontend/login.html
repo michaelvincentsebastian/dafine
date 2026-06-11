@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-primary": "#f5f4f0", "primary-fixed-dim": "#e4c600",
+            "background": "#131313", "on-primary": "#393000",
+            "on-surface": "#e5e2e1", "surface-tint": "#e4c600",
+            "surface-dim": "#131313", "surface-container": "#201f1f",
+            "surface-container-lowest": "#0e0e0e", "on-background": "#e5e2e1",
+            "error-container": "#93000a", "status-error": "#e57373",
+            "on-surface-variant": "#cfc6ab", "primary-fixed": "#ffe250",
+            "text-secondary": "#777777", "surface": "#131313",
+            "surface-bright": "#3a3939", "on-primary-container": "#685900",
+            "surface-variant": "#353534", "error": "#ffb4ab",
+            "primary-container": "#f0d000", "accent-hover": "#c9ae00",
+            "surface-container-highest": "#353534", "surface-container-low": "#1c1b1b",
+            "on-primary-fixed": "#211b00", "primary": "#ffeda4",
+            "border-base": "#262626", "border-muted": "#2e2e2e",
+            "secondary": "#c8c6c5", "surface-container-high": "#2a2a2a",
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          spacing: { "gutter": "1px", "gap-sm": "8px", "container-max": "1100px", "gap-md": "16px", "gap-lg": "24px", "margin-desktop": "32px", "margin-mobile": "16px" },
+          fontFamily: { "label-sm": ["DM Mono"], "label-md": ["DM Mono"], "micro-tag": ["DM Mono"], "ui-header": ["Syne"], "headline-sm": ["Syne"], "headline-lg": ["Syne"], "headline-lg-mobile": ["Syne"], "body-md": ["DM Mono"] },
+          fontSize: {
+            "label-sm": ["10px", { lineHeight: "1.4", fontWeight: "500" }],
+            "label-md": ["11px", { lineHeight: "1.5", fontWeight: "400" }],
+            "micro-tag": ["9px", { lineHeight: "1.2", fontWeight: "500" }],
+            "ui-header": ["16px", { lineHeight: "1.4", fontWeight: "700" }],
+            "headline-sm": ["21px", { lineHeight: "1.2", fontWeight: "800" }],
+            "headline-lg": ["36px", { lineHeight: "1.1", fontWeight: "800" }],
+            "headline-lg-mobile": ["32px", { lineHeight: "1.1", fontWeight: "800" }],
+            "body-md": ["12px", { lineHeight: "1.8", fontWeight: "400" }],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #131313; color: #f5f4f0; min-height: 100vh; display: flex; flex-direction: column; }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.04; pointer-events: none; z-index: 9999;
+    }
+    .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; -webkit-font-smoothing: antialiased; }
+    input[type="email"], input[type="password"], input[type="text"] {
+      background-color: #1c1b1b; outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #f0d000 !important; }
+    .btn-primary { background: #f0d000; color: #393000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; transition: background 0.2s, transform 0.1s; }
+    .btn-primary:hover { background: #c9ae00; }
+    .btn-primary:active { transform: scale(0.98); }
+    .error-msg { display: none; color: #e57373; font-family: 'DM Mono', monospace; font-size: 11px; padding: 10px 14px; background: rgba(229,115,115,0.08); border: 1px solid rgba(229,115,115,0.25); border-radius: 2px; }
+    .error-msg.visible { display: block; }
+    #loading-spinner { display: none; }
+    .loading .btn-primary { opacity: 0.6; pointer-events: none; }
+    .loading #loading-spinner { display: inline-block; }
+    .loading #btn-text { display: none; }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- Nav -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="login.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <span class="text-text-secondary font-label-md text-label-md">Data Refinement Platform</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></div>
+        <span class="font-micro-tag text-micro-tag text-text-secondary uppercase tracking-widest hidden md:inline">System: Nominal</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-grow flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-16">
+    <div class="w-full max-w-[440px] bg-surface-container-lowest border border-border-base p-8 md:p-10 relative overflow-hidden">
+      <!-- Accent glow -->
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary-container/8 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header — toggled by mode -->
+      <div class="mb-8 text-center">
+        <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-3" id="mode-eyebrow">Authentication Terminal</p>
+        <h1 id="form-title" class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">
+          Sign in
+        </h1>
+        <p id="form-subtitle" class="font-body-md text-body-md text-text-secondary">
+          Enter your credentials to access the data terminal.
+        </p>
+      </div>
+
+      <!-- Error -->
+      <div id="error-box" class="error-msg mb-5">⚠ &nbsp;<span id="error-text"></span></div>
+      <!-- Success -->
+      <div id="success-box" class="hidden mb-5 text-[#4caf50] font-body-md text-body-md p-3 bg-[#4caf50]/08 border border-[#4caf50]/25 rounded-sm">
+        <span id="success-text"></span>
+      </div>
+
+      <!-- Form -->
+      <div id="login-form" class="flex flex-col gap-5">
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider" for="email">Email Address</label>
+          <input id="email" type="email" placeholder="user@domain.com"
+            class="w-full border border-border-base rounded-none px-4 py-3 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+        </div>
+        <!-- Password -->
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider" for="password">Password</label>
+          </div>
+          <div class="relative">
+            <input id="password" type="password" placeholder="••••••••••••"
+              class="w-full border border-border-base rounded-none px-4 py-3 pr-12 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+            <button type="button" onclick="togglePw('password','eye-login')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors">
+              <span id="eye-login" class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 0">visibility</span>
+            </button>
+          </div>
+        </div>
+        <!-- Confirm password (register only) -->
+        <div id="confirm-wrap" class="flex-col gap-2 hidden">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider" for="confirm-password">Confirm Password</label>
+          <div class="relative">
+            <input id="confirm-password" type="password" placeholder="••••••••••••"
+              class="w-full border border-border-base rounded-none px-4 py-3 pr-12 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+            <button type="button" onclick="togglePw('confirm-password','eye-confirm')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors">
+              <span id="eye-confirm" class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 0">visibility</span>
+            </button>
+          </div>
+        </div>
+        <!-- Submit -->
+        <button id="submit-btn" onclick="handleSubmit()"
+          class="btn-primary w-full mt-2 py-4 rounded-none flex justify-center items-center gap-2">
+          <span id="loading-spinner" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          <span id="btn-text">Sign in</span>
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'wght' 600" id="btn-arrow">arrow_forward</span>
+        </button>
+      </div>
+
+      <!-- Toggle mode -->
+      <div class="mt-8 pt-6 border-t border-border-base text-center">
+        <p class="font-label-md text-label-md text-text-secondary">
+          <span id="toggle-label">Don't have an account?</span>
+          <button onclick="toggleMode()" id="toggle-btn"
+            class="text-primary-fixed-dim hover:text-primary-container transition-colors ml-1 border-b border-primary-fixed-dim/30 hover:border-primary-container pb-0.5 font-label-md text-label-md">
+            Create account
+          </button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Status tag -->
+    <div class="mt-6 flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-border-base">
+      <div class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></div>
+      <span class="font-micro-tag text-micro-tag text-text-secondary uppercase tracking-widest">Backend: <span id="api-status">Checking...</span></span>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="#" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Privacy Policy</a>
+        <a href="#" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Documentation</a>
+        <a href="#" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-status-error/80 block"></span>API Status
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost:8000';
+    let isRegister = false;
+
+    // ── Check auth on load ──
+    (async function init() {
+      const token = localStorage.getItem('dafine_token');
+      if (token) {
+        try {
+          const r = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+          if (r.ok) {
+            const d = await r.json();
+            if (d.has_api_key) window.location.href = 'main.html';
+            else window.location.href = 'account-settings.html';
+            return;
+          }
+        } catch {}
+      }
+      // Check backend alive
+      try {
+        const r = await fetch(`${API}/`);
+        document.getElementById('api-status').textContent = r.ok ? 'Online' : 'Degraded';
+      } catch {
+        document.getElementById('api-status').textContent = 'Offline';
+      }
+    })();
+
+    function toggleMode() {
+      isRegister = !isRegister;
+      document.getElementById('form-title').textContent     = isRegister ? 'Create account' : 'Sign in';
+      document.getElementById('form-subtitle').textContent  = isRegister ? 'Set up your Dafine credentials to get started.' : 'Enter your credentials to access the data terminal.';
+      document.getElementById('btn-text').textContent       = isRegister ? 'Create account' : 'Sign in';
+      document.getElementById('toggle-label').textContent   = isRegister ? 'Already have an account?' : "Don't have an account?";
+      document.getElementById('toggle-btn').textContent     = isRegister ? 'Sign in' : 'Create account';
+      const cw = document.getElementById('confirm-wrap');
+      cw.classList.toggle('hidden', !isRegister);
+      cw.classList.toggle('flex', isRegister);
+      hideError(); hideSuccess();
+    }
+
+    async function handleSubmit() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      hideError(); hideSuccess();
+
+      if (!email || !password) { showError('Email and password are required.'); return; }
+      if (isRegister) {
+        const confirm = document.getElementById('confirm-password').value;
+        if (password !== confirm) { showError('Passwords do not match.'); return; }
+        if (password.length < 8)  { showError('Password must be at least 8 characters.'); return; }
+      }
+
+      setLoading(true);
+      try {
+        const endpoint = isRegister ? '/auth/register' : '/auth/login';
+        const res = await fetch(`${API}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showError(data.detail || 'Authentication failed.'); return; }
+
+        localStorage.setItem('dafine_token', data.token);
+        localStorage.setItem('dafine_email', data.user.email);
+        localStorage.setItem('dafine_user_id', data.user.id);
+
+        if (isRegister) {
+          showSuccess('Account created! Redirecting...');
+          setTimeout(() => window.location.href = 'account-settings.html', 800);
+        } else {
+          if (data.has_api_key) {
+            window.location.href = 'main.html';
+          } else {
+            window.location.href = 'account-settings.html';
+          }
+        }
+      } catch (e) {
+        showError(`Cannot reach backend at ${API}. Make sure the server is running.`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function togglePw(inputId, iconId) {
+      const inp  = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
+    }
+
+    function setLoading(on) {
+      document.getElementById('submit-btn').classList.toggle('loading', on);
+      document.getElementById('loading-spinner').style.display = on ? 'inline-block' : 'none';
+      document.getElementById('btn-text').style.display        = on ? 'none' : 'inline';
+      document.getElementById('btn-arrow').style.display       = on ? 'none' : 'inline-block';
+      document.getElementById('submit-btn').disabled           = on;
+    }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-box').classList.add('visible');
+    }
+    function hideError() { document.getElementById('error-box').classList.remove('visible'); }
+
+    function showSuccess(msg) {
+      document.getElementById('success-text').textContent = msg;
+      document.getElementById('success-box').classList.remove('hidden');
+    }
+    function hideSuccess() { document.getElementById('success-box').classList.add('hidden'); }
+
+    // Enter key submit
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleSubmit(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Clean</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-primary":"#f5f4f0","primary-fixed-dim":"#e4c600","background":"#131313",
+            "on-primary":"#393000","on-surface":"#e5e2e1","surface-container":"#201f1f",
+            "surface-container-lowest":"#0e0e0e","status-error":"#e57373",
+            "on-surface-variant":"#cfc6ab","primary-fixed":"#ffe250","text-secondary":"#777777",
+            "surface":"#131313","surface-bright":"#3a3939","on-primary-container":"#685900",
+            "surface-variant":"#353534","primary-container":"#f0d000","accent-hover":"#c9ae00",
+            "surface-container-highest":"#353534","surface-container-low":"#1c1b1b",
+            "on-primary-fixed":"#211b00","primary":"#ffeda4","border-base":"#262626",
+            "border-muted":"#2e2e2e","secondary":"#c8c6c5","surface-container-high":"#2a2a2a",
+            "surface-tertiary":"#242424",
+          },
+          borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+          spacing:{"gutter":"1px","gap-sm":"8px","container-max":"1100px","gap-md":"16px","gap-lg":"24px","margin-desktop":"32px","margin-mobile":"16px"},
+          fontFamily:{"label-sm":["DM Mono"],"label-md":["DM Mono"],"micro-tag":["DM Mono"],"ui-header":["Syne"],"headline-sm":["Syne"],"headline-lg":["Syne"],"headline-lg-mobile":["Syne"],"body-md":["DM Mono"]},
+          fontSize:{
+            "label-sm":["10px",{lineHeight:"1.4",fontWeight:"500"}],
+            "label-md":["11px",{lineHeight:"1.5",fontWeight:"400"}],
+            "micro-tag":["9px",{lineHeight:"1.2",fontWeight:"500"}],
+            "ui-header":["16px",{lineHeight:"1.4",fontWeight:"700"}],
+            "headline-sm":["21px",{lineHeight:"1.2",fontWeight:"800"}],
+            "headline-lg":["36px",{lineHeight:"1.1",fontWeight:"800"}],
+            "headline-lg-mobile":["32px",{lineHeight:"1.1",fontWeight:"800"}],
+            "body-md":["12px",{lineHeight:"1.8",fontWeight:"400"}],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root { --yellow:#f0d000;--yellow2:#c9ae00;--black:#0f0f0f;--gray:#1a1a1a;--gray2:#242424;--gray3:#2e2e2e;--muted:#777;--border:#262626;--font-mono:'DM Mono',monospace;--font-disp:'Syne',sans-serif;--ease:cubic-bezier(.4,0,.2,1); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:#0f0f0f;color:#f5f4f0;font-family:var(--font-disp);min-height:100vh;display:flex;flex-direction:column;}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.3;}
+    .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;-webkit-font-smoothing:antialiased;}
+    .c{max-width:1100px;margin:0 auto;padding:0 32px}
+    @media(max-width:640px){.c{padding:0 16px}}
+    /* ── upload ── */
+    .upload-zone{border:1.5px dashed var(--border);padding:56px 40px;text-align:center;cursor:pointer;transition:border-color 200ms var(--ease),background 200ms var(--ease);}
+    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--yellow);background:rgba(240,208,0,.03);}
+    .upload-zone.drag-over .upload-ico{transform:scale(1.08) translateY(-4px);}
+    .upload-ico{width:44px;height:44px;margin:0 auto 18px;transition:transform 200ms var(--ease);}
+    /* ── file badge ── */
+    .file-badge{display:none;align-items:center;gap:12px;background:var(--gray);border:1px solid var(--border);padding:13px 16px;margin-top:16px;}
+    .file-badge.visible{display:flex;}
+    .badge-ico{width:34px;height:34px;background:var(--yellow);display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:2px;}
+    /* ── pipeline ── */
+    .pipeline{display:flex;align-items:center;gap:0;margin:32px 0 0;overflow-x:auto;padding-bottom:4px;}
+    .pipeline::-webkit-scrollbar{display:none;}
+    .step-box{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;transition:all 200ms var(--ease);}
+    .step-box.active{border-color:var(--yellow);color:var(--yellow);background:rgba(240,208,0,.05);}
+    .step-box.done{border-color:var(--gray3);color:var(--gray3);}
+    .step-arr{font-family:var(--font-mono);font-size:11px;color:var(--border);padding:0 8px;}
+    /* ── error ── */
+    .err{display:none;background:rgba(200,60,60,.08);border:1px solid rgba(200,60,60,.3);padding:13px 18px;font-family:var(--font-mono);font-size:12px;color:#e57373;margin-top:14px;}
+    .err.visible{display:block;}
+    /* ── loading ── */
+    .ldr{display:none;align-items:center;gap:12px;padding:18px 0;font-family:var(--font-mono);font-size:11px;color:var(--muted);}
+    .ldr.visible{display:flex;}
+    .ldr-bar{flex:1;height:2px;background:var(--gray2);overflow:hidden;}
+    .ldr-fill{height:100%;background:var(--yellow);animation:sweep 1.6s ease-in-out infinite;}
+    @keyframes sweep{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+    /* ── meta/cols ── */
+    .sec-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+    .sec-lbl::before{content:'';width:16px;height:1px;background:var(--yellow);}
+    .meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:1px;background:var(--border);margin-bottom:32px;}
+    .meta-card{background:#131313;padding:14px 16px;}
+    .meta-lbl{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+    .meta-val{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
+    .meta-val.accent{color:var(--yellow);}
+    .col-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px;}
+    .col-chip{display:flex;align-items:center;gap:6px;background:var(--gray);border:1px solid var(--border);padding:5px 10px;}
+    .chip-name{font-size:12px;font-weight:600;}
+    .chip-type{font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+    /* ── table ── */
+    .tbl-wrap{overflow-x:auto;margin-bottom:32px;border:1px solid var(--border);}
+    table{width:100%;border-collapse:collapse;min-width:500px;}
+    th,td{padding:10px 14px;font-family:var(--font-mono);font-size:11px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    th{background:var(--gray);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:500;}
+    td{color:#ddd;}
+    td.null{color:var(--gray3);font-style:italic;}
+    tr:last-child td{border-bottom:none;}
+    /* ── context grid ── */
+    .ctx-grid{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);margin-bottom:32px;}
+    .ctx-row{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--border);background:#131313;}
+    .ctx-row:last-child{border-bottom:none;}
+    .ctx-col-info{padding:12px 14px;border-right:1px solid var(--border);}
+    .ctx-col-name{font-size:12px;font-weight:700;display:block;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ctx-col-meta{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
+    .dtype-tag{font-family:var(--font-mono);font-size:9px;background:var(--gray2);border:1px solid var(--border);padding:1px 6px;color:var(--muted);text-transform:uppercase;}
+    .label-tag{font-family:var(--font-mono);font-size:9px;background:rgba(240,208,0,.07);border:1px solid rgba(240,208,0,.2);color:var(--yellow);padding:1px 6px;}
+    .null-badge{font-family:var(--font-mono);font-size:9px;padding:1px 6px;background:rgba(240,160,0,.1);border:1px solid rgba(240,160,0,.3);color:#f0a000;}
+    .null-badge.null-high{background:rgba(200,60,60,.1);border-color:rgba(200,60,60,.3);color:#e57373;}
+    .ctx-top{font-family:var(--font-mono);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ctx-input{width:100%;background:transparent;border:none;outline:none;padding:12px 14px;font-family:var(--font-mono);font-size:11px;color:#f5f4f0;}
+    .ctx-input::placeholder{color:var(--muted);}
+    .ctx-input:focus{background:rgba(240,208,0,.03);}
+    /* ── clean panel ── */
+    .clean-panel{border:1px solid var(--border);padding:28px;background:var(--gray);margin-bottom:24px;}
+    .clean-panel-title{font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;}
+    .clean-panel-sub{font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+    .clean-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-disp);font-weight:700;border:none;cursor:pointer;transition:all 200ms var(--ease);}
+    .btn-sm{font-size:12px;padding:8px 18px;}
+    .btn-md{font-size:13px;padding:10px 22px;}
+    .btn-full{width:100%;justify-content:center;font-size:13px;padding:13px;letter-spacing:.04em;text-transform:uppercase;}
+    .btn-yellow{background:var(--yellow);color:#0f0f0f;}
+    .btn-yellow:hover{background:var(--yellow2);transform:translateY(-1px);}
+    .btn-yellow:active{transform:translateY(0);}
+    .btn-yellow:disabled{background:var(--gray2);color:var(--muted);cursor:not-allowed;transform:none;}
+    .btn-outline{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-outline:hover{border-color:#f5f4f0;color:#f5f4f0;}
+    /* ── sql / reasoning (collapsible) ── */
+    .ai-collapse{border:1px solid var(--border);margin-bottom:16px;}
+    .ai-collapse-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;background:var(--gray);user-select:none;}
+    .ai-collapse-hdr:hover{background:var(--gray2);}
+    .ai-collapse-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+    .ai-collapse-chevron{font-family:var(--font-mono);font-size:11px;color:var(--muted);transition:transform 200ms;}
+    .ai-collapse-chevron.open{transform:rotate(180deg);}
+    .ai-collapse-body{display:none;background:#131313;}
+    .ai-collapse-body.open{display:block;}
+    .ai-collapse-body pre{padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.7;color:#f5f4f0;overflow-x:auto;white-space:pre-wrap;word-break:break-all;}
+    .ai-collapse-body p{padding:16px;font-family:var(--font-mono);font-size:12px;color:var(--muted);line-height:1.8;}
+    .sql-keyword{color:var(--yellow);font-weight:500;}
+    /* ── download ── */
+    .dl-row{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--gray);border:1px solid var(--border);margin-bottom:16px;}
+    /* ── title input ── */
+    .title-input{width:100%;background:#131313;border:1px solid var(--border);color:#f5f4f0;font-family:var(--font-disp);font-size:14px;font-weight:700;padding:10px 14px;outline:none;transition:border-color 200ms;}
+    .title-input:focus{border-color:var(--yellow);}
+    .title-input::placeholder{color:var(--muted);font-weight:400;}
+    /* ── outlier ── */
+    .outlier-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:11px;}
+    .outlier-row:last-child{border-bottom:none;}
+    .outlier-col{color:var(--yellow);font-weight:500;min-width:120px;}
+    .outlier-detail{flex:1;color:var(--muted);}
+    .outlier-badge{background:rgba(240,160,0,.1);border:1px solid rgba(240,160,0,.3);color:#f0a000;padding:2px 8px;font-size:10px;}
+    .divider{height:1px;background:var(--border);margin:32px 0;}
+    .fade-up{opacity:0;transform:translateY(18px);animation:fu .55s ease forwards;}
+    .fade-up:nth-child(1){animation-delay:.05s}
+    .fade-up:nth-child(2){animation-delay:.15s}
+    .fade-up:nth-child(3){animation-delay:.25s}
+    @keyframes fu{to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="sticky top-0 z-[100] w-full border-b border-border-base bg-[#0f0f0f]/90 backdrop-blur-md px-4 sm:px-8 py-5">
+    <div class="mx-auto max-w-[1100px] flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="main.html" class="flex items-baseline gap-1 font-headline-sm tracking-tight text-text-primary">
+          Da<span class="text-primary-container">+</span>fine
+          <span class="font-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 ml-2 uppercase tracking-widest">beta</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 font-label-md uppercase tracking-widest">
+          <a class="text-primary-container border-b border-primary-container pb-0.5" href="main.html">Clean</a>
+          <a class="text-text-secondary hover:text-text-primary transition-colors" href="dashboard.html">Dashboard</a>
+          <a class="text-text-secondary hover:text-text-primary transition-colors" href="history.html">History</a>
+          <a class="text-text-secondary hover:text-text-primary transition-colors" href="account-settings.html">Account</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[180px]"></span>
+        <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1 text-[11px]">
+          <span class="material-symbols-outlined" style="font-size:14px">logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="pt-[72px] pb-[48px]">
+    <div class="c">
+      <div class="fade-up" style="font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+        <span style="width:20px;height:1px;background:var(--yellow);display:inline-block"></span>Upload. Profile. Refine.
+      </div>
+      <h1 class="fade-up" style="font-family:var(--font-disp);font-size:clamp(36px,5.5vw,68px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:18px;">Raw data in.<br><span style="color:var(--muted)">Clean insight out.</span></h1>
+      <p class="fade-up" style="font-family:var(--font-mono);font-size:12px;color:var(--muted);line-height:1.8;max-width:440px">Upload your dataset — Dafine profiles it, sends it to AI, executes the cleaning query via DuckDB, and returns your cleaned file.</p>
+      <!-- pipeline -->
+      <div class="pipeline" style="margin-top:32px">
+        <div style="display:flex;align-items:center"><div class="step-box active" id="st-upload">Upload</div><div class="step-arr">→</div></div>
+        <div style="display:flex;align-items:center"><div class="step-box" id="st-preview">Preview</div><div class="step-arr">→</div></div>
+        <div style="display:flex;align-items:center"><div class="step-box" id="st-clean">AI Clean</div><div class="step-arr">→</div></div>
+        <div style="display:flex;align-items:center"><div class="step-box" id="st-result">Download</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section style="padding:0 0 56px">
+    <div class="c">
+      <!-- Session title -->
+      <div style="margin-bottom:16px">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Session Title <span style="color:var(--muted);font-size:9px">(optional — helps identify this cleaning in History)</span></div>
+        <input id="session-title" class="title-input" type="text" placeholder="e.g. Q1 Sales Cleanup, Customer Export June 2025…" maxlength="100" />
+      </div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-ico">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect height="36" rx="2" stroke="#f0d000" stroke-width="1.5" width="32" x="8" y="6"/>
+            <path d="M16 18h16M16 24h16M16 30h10" stroke="#f0d000" stroke-linecap="round" stroke-width="1.5"/>
+            <circle cx="36" cy="36" fill="#0f0f0f" r="8" stroke="#f0d000" stroke-width="1.5"/>
+            <path d="M36 32v8M32 36h8" stroke="#f0d000" stroke-linecap="round" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Drop your dataset here</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.05em;margin-bottom:24px">CSV · PARQUET · XLSX · DB &nbsp;|&nbsp; max 100 MB</div>
+        <button class="btn btn-md btn-yellow" onclick="event.stopPropagation();document.getElementById('file-input').click()">
+          <svg fill="none" height="13" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Choose File
+        </button>
+        <input accept=".csv,.parquet,.xlsx,.xls,.db,.sqlite" id="file-input" style="display:none" type="file" />
+      </div>
+      <div class="file-badge" id="file-badge">
+        <div class="badge-ico"><span id="badge-ext" style="font-family:var(--font-mono);font-size:9px;font-weight:500;color:#0f0f0f;letter-spacing:.05em;text-transform:uppercase">CSV</span></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;letter-spacing:-.2px" id="badge-name">—</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px" id="badge-size">—</div>
+        </div>
+        <button onclick="resetAll()" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:18px;line-height:1;transition:color 200ms" onmouseover="this.style.color='#f5f4f0'" onmouseout="this.style.color='var(--muted)'">×</button>
+      </div>
+      <div class="err" id="error-box"></div>
+      <div class="ldr" id="loading-preview">
+        <span id="lbl-preview">Reading file</span>
+        <div class="ldr-bar"><div class="ldr-fill"></div></div>
+        <span>DuckDB</span>
+      </div>
+      <button class="btn btn-full btn-yellow" id="btn-preview" onclick="runPreview()" style="display:none;margin-top:14px">→ Preview Dataset</button>
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section id="preview-sec" style="padding:0 0 56px;display:none">
+    <div class="c">
+      <div class="sec-lbl">File Metadata</div>
+      <div class="meta-grid" id="meta-grid"></div>
+      <div class="sec-lbl">Column Schema</div>
+      <div class="col-chips" id="col-chips"></div>
+      <div class="sec-lbl">Data Preview — first 10 rows</div>
+      <div class="tbl-wrap">
+        <table><thead id="tbl-head"></thead><tbody id="tbl-body"></tbody></table>
+      </div>
+      <div class="divider"></div>
+      <!-- Context -->
+      <div class="sec-lbl">Column Context <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.05em;text-transform:none;margin-left:8px">Optional — helps AI understand your columns</span></div>
+      <div class="ctx-grid" id="ctx-grid"></div>
+      <div class="divider"></div>
+      <!-- Clean panel -->
+      <div class="clean-panel">
+        <div class="clean-panel-title">AI Data Cleaning</div>
+        <div class="clean-panel-sub">Dafine will profile your data, build a dynamic prompt, call OpenRouter AI, execute the generated DuckDB query, and return your cleaned file.</div>
+        <div class="ldr" id="loading-clean">
+          <span id="lbl-clean">Profiling data</span>
+          <div class="ldr-bar"><div class="ldr-fill"></div></div>
+          <span>DuckDB + AI</span>
+        </div>
+        <div class="clean-actions" id="clean-actions">
+          <button class="btn btn-md btn-yellow" onclick="runClean()">
+            <svg fill="none" height="13" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="13"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Clean with AI
+          </button>
+          <button class="btn btn-sm btn-outline" onclick="resetAll()">Start Over</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLEAN RESULT -->
+  <section id="clean-sec" style="padding:0 0 56px;display:none">
+    <div class="c">
+      <!-- Download -->
+      <div class="sec-lbl">Cleaned File</div>
+      <div class="dl-row">
+        <div style="width:36px;height:36px;background:var(--yellow);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg fill="none" height="16" stroke="#0f0f0f" stroke-width="2.5" viewBox="0 0 24 24" width="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;letter-spacing:-.2px" id="dl-filename">—</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:3px">Cleaned · Ready to download</div>
+        </div>
+        <button class="btn btn-md btn-yellow" onclick="downloadFile()">Download</button>
+      </div>
+
+      <!-- Outlier report -->
+      <div class="sec-lbl">Outlier Report</div>
+      <div id="outlier-panel" style="border:1px solid var(--border);margin-bottom:32px;background:#131313"></div>
+
+      <!-- AI Output (collapsible) -->
+      <div class="sec-lbl">AI Output <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.05em;text-transform:none;margin-left:8px">Click to reveal</span></div>
+
+      <!-- Generated SQL (collapsed by default) -->
+      <div class="ai-collapse" id="sql-collapse">
+        <div class="ai-collapse-hdr" onclick="toggleCollapse('sql-collapse')">
+          <span class="ai-collapse-title">Generated SQL — DuckDB Query</span>
+          <span class="ai-collapse-chevron" id="sql-chev">▼</span>
+        </div>
+        <div class="ai-collapse-body" id="sql-body">
+          <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 16px;border-bottom:1px solid var(--border)">
+            <button class="btn btn-sm btn-outline" onclick="copySQL()">Copy SQL</button>
+          </div>
+          <pre id="sql-output"></pre>
+        </div>
+      </div>
+
+      <!-- AI Reasoning (collapsed by default) -->
+      <div class="ai-collapse" id="reason-collapse">
+        <div class="ai-collapse-hdr" onclick="toggleCollapse('reason-collapse')">
+          <span class="ai-collapse-title">AI Reasoning — Explanation</span>
+          <span class="ai-collapse-chevron" id="reason-chev">▼</span>
+        </div>
+        <div class="ai-collapse-body" id="reason-body">
+          <p id="reasoning-output">—</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="display:flex;gap:10px;padding-bottom:48px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-outline" onclick="resetAll()">Clean Another File</button>
+        <a href="history.html" class="btn btn-sm btn-outline" style="text-decoration:none">
+          <span class="material-symbols-outlined" style="font-size:14px">history</span>View in History
+        </a>
+        <a href="dashboard.html" class="btn btn-sm btn-outline" style="text-decoration:none">
+          <span class="material-symbols-outlined" style="font-size:14px">dashboard</span>Explore in Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid var(--border);padding:22px 0;margin-top:auto" class="bg-surface-container-lowest">
+    <div class="c flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span style="font-family:var(--font-disp);font-weight:700;font-size:16px">Da+fine</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">© 2025 DAFINE. DATA REFINEMENT PLATFORM.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="history.html" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase">History</a>
+        <a href="dashboard.html" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase">Dashboard</a>
+        <a href="account-settings.html" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase">Account</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API     = 'http://localhost:8000';
+    const ALLOWED = ['csv','parquet','xlsx','xls','db','sqlite'];
+    const CLEAN_MSGS = ['Profiling data','Building AI prompt','Calling AI model','Parsing SQL','Executing DuckDB','Exporting file'];
+
+    let selectedFile = null, cleanedBlob = null, cleanedName = null, previewData = null;
+
+    function authHeaders() {
+      const t = localStorage.getItem('dafine_token');
+      return t ? { 'Authorization': `Bearer ${t}` } : {};
+    }
+    function requireAuth() {
+      if (!localStorage.getItem('dafine_token')) { window.location.href = 'login.html'; }
+    }
+    function logout() {
+      localStorage.clear(); window.location.href = 'login.html';
+    }
+
+    (async function init() {
+      requireAuth();
+      const email = localStorage.getItem('dafine_email');
+      if (email) document.getElementById('nav-email').textContent = email;
+      // Verify API key set
+      try {
+        const r = await fetch(`${API}/auth/api-key/status`, { headers: authHeaders() });
+        if (r.status === 401) { logout(); return; }
+        const d = await r.json();
+        if (!d.has_api_key) window.location.href = 'account-settings.html';
+      } catch {}
+    })();
+
+    // ── Drag & Drop ──
+    const zone = document.getElementById('upload-zone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+    document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+    function handleFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!ALLOWED.includes(ext)) { showErr(`".${ext}" not supported. Allowed: ${ALLOWED.join(', ')}`); return; }
+      selectedFile = file; hideErr();
+      document.getElementById('badge-ext').textContent  = ext.toUpperCase();
+      document.getElementById('badge-name').textContent = file.name;
+      document.getElementById('badge-size').textContent = fmtBytes(file.size);
+      document.getElementById('file-badge').classList.add('visible');
+      document.getElementById('btn-preview').style.display = 'block';
+      setStep('upload');
+    }
+
+    async function runPreview() {
+      if (!selectedFile) return;
+      setLdr('loading-preview','lbl-preview',true,['Reading file','Scanning schema','Querying DuckDB']);
+      document.getElementById('btn-preview').style.display = 'none';
+      hideErr(); document.getElementById('preview-sec').style.display = 'none'; document.getElementById('clean-sec').style.display = 'none';
+      const form = new FormData(); form.append('file', selectedFile);
+      try {
+        const res = await fetch(`${API}/preview`, { method:'POST', body:form });
+        const data = await res.json();
+        if (!res.ok) { showErr(data.detail || 'Server error'); return; }
+        renderPreview(data);
+        document.getElementById('preview-sec').style.display = 'block';
+        document.getElementById('preview-sec').scrollIntoView({ behavior:'smooth', block:'start' });
+        setStep('preview');
+      } catch { showErr(`Cannot reach backend at ${API}. Make sure uvicorn is running.`); document.getElementById('btn-preview').style.display = 'block'; }
+      finally { setLdr('loading-preview','lbl-preview',false); }
+    }
+
+    function renderPreview(d) {
+      const meta = [
+        {l:'Rows',v:d.total_rows.toLocaleString()},{l:'Columns',v:d.total_columns},
+        {l:'Format',v:d.file_type.toUpperCase(),a:true},{l:'Nulls',v:d.total_nulls.toLocaleString()},
+        {l:'Size',v:fmtBytes(selectedFile.size)},{l:'Engine',v:'DuckDB',a:true},
+      ];
+      if (d.duplicate_count > 0) meta.push({l:'Dupes',v:d.duplicate_count.toLocaleString()});
+      document.getElementById('meta-grid').innerHTML = meta.map(m =>
+        `<div class="meta-card"><div class="meta-lbl">${m.l}</div><div class="meta-val${m.a?' accent':''}">${m.v}</div></div>`
+      ).join('');
+      document.getElementById('col-chips').innerHTML = d.columns.map(c =>
+        `<div class="col-chip"><span class="chip-name">${c.name}</span><span class="chip-type">${c.dtype}</span></div>`
+      ).join('');
+      const cols = d.columns.map(c => c.name);
+      document.getElementById('tbl-head').innerHTML = `<tr><th>#</th>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+      document.getElementById('tbl-body').innerHTML = d.rows.map((row,i) =>
+        `<tr><td>${i}</td>${cols.map(c => { const v=row[c]; return(v===null||v===undefined||v==='')?`<td class="null">null</td>`:`<td>${String(v)}</td>`; }).join('')}</tr>`
+      ).join('');
+      previewData = d;
+      renderCtxGrid(d.columns);
+    }
+
+    function renderCtxGrid(cols) {
+      document.getElementById('ctx-grid').innerHTML = cols.map(col => {
+        const nb = col.null_count > 0 ? `<span class="null-badge ${col.null_pct>40?'null-high':''}">${col.null_pct}% null</span>` : '';
+        const lb = (col.labels||[]).map(l=>`<span class="label-tag">${l.toLowerCase().replace(/_/g,' ')}</span>`).join('');
+        const top = col.top_values?.length ? 'Top: '+col.top_values.slice(0,3).map(t=>`${t.value}(${t.pct}%)`).join(', ')
+          : col.sample_values ? 'Sample: '+col.sample_values.join(', ') : '';
+        return `<div class="ctx-row">
+          <div class="ctx-col-info">
+            <span class="ctx-col-name" title="${col.name}">${col.name}</span>
+            <div class="ctx-col-meta"><span class="dtype-tag">${col.dtype}</span>${lb}${nb}</div>
+            <span class="ctx-top" title="${top}">${top}</span>
+          </div>
+          <input class="ctx-input" id="ctx-${col.name}" placeholder="e.g. 1=Male, 2=Female — optional context for AI" type="text" autocomplete="off" />
+        </div>`;
+      }).join('');
+    }
+
+    function getCtxs() {
+      if (!previewData) return {};
+      const ctx = {};
+      previewData.columns.forEach(col => {
+        const el = document.getElementById(`ctx-${col.name}`);
+        if (el && el.value.trim()) ctx[col.name] = el.value.trim();
+      });
+      return ctx;
+    }
+
+    async function runClean() {
+      if (!selectedFile) return;
+      document.getElementById('clean-sec').style.display = 'none';
+      document.getElementById('clean-actions').style.display = 'none';
+      setLdr('loading-clean','lbl-clean',true,CLEAN_MSGS);
+      setStep('clean');
+      const title    = document.getElementById('session-title').value.trim();
+      const contexts = getCtxs();
+      const form = new FormData();
+      form.append('file', selectedFile);
+      form.append('column_contexts', JSON.stringify(contexts));
+      if (title) form.append('title', title);
+      try {
+        const headers = authHeaders();
+        const res = await fetch(`${API}/clean`, { method:'POST', headers, body:form });
+        if (!res.ok) {
+          const err = await res.json();
+          showErr(err.detail || 'Clean failed');
+          document.getElementById('clean-actions').style.display = 'flex';
+          return;
+        }
+        const reasoning = decodeURIComponent(res.headers.get('X-AI-Reasoning')||'No reasoning provided.');
+        const sql       = decodeURIComponent(res.headers.get('X-AI-SQL')||'');
+        const outlierH  = res.headers.get('X-Outlier-Report')||'[]';
+        const disp      = res.headers.get('Content-Disposition')||'';
+        const fn        = disp.match(/filename="([^"]+)"/);
+        cleanedName = fn ? fn[1] : `cleaned_${selectedFile.name}`;
+        cleanedBlob = await res.blob();
+
+        document.getElementById('sql-output').innerHTML = hlSQL(sql);
+        document.getElementById('reasoning-output').textContent = reasoning;
+        document.getElementById('dl-filename').textContent = cleanedName;
+        try { renderOutliers(JSON.parse(outlierH)); } catch { renderOutliers([]); }
+
+        document.getElementById('clean-sec').style.display = 'block';
+        document.getElementById('clean-sec').scrollIntoView({ behavior:'smooth', block:'start' });
+        setStep('result');
+      } catch(e) {
+        showErr(`Request failed: ${e.message}`);
+        document.getElementById('clean-actions').style.display = 'flex';
+      } finally {
+        setLdr('loading-clean','lbl-clean',false);
+        document.getElementById('clean-actions').style.display = 'flex';
+      }
+    }
+
+    function renderOutliers(ol) {
+      const el = document.getElementById('outlier-panel');
+      if (!ol||!ol.length) { el.innerHTML = '<p style="font-family:var(--font-mono);font-size:11px;color:#4caf50;padding:16px">✓ No outliers detected in numeric columns.</p>'; return; }
+      el.innerHTML = ol.map(o => `<div class="outlier-row"><span class="outlier-col">${o.column}</span><span class="outlier-detail">IQR: ${o.lower_bound} – ${o.upper_bound} | range: ${o.min} – ${o.max}</span><span class="outlier-badge">${o.count} rows (${o.pct}%)</span></div>`).join('');
+    }
+
+    function toggleCollapse(id) {
+      const body = document.getElementById(id).querySelector('.ai-collapse-body');
+      const chev = document.getElementById(id).querySelector('.ai-collapse-chevron');
+      body.classList.toggle('open');
+      chev.classList.toggle('open');
+    }
+
+    function downloadFile() {
+      if (!cleanedBlob||!cleanedName) return;
+      const url = URL.createObjectURL(cleanedBlob);
+      const a   = document.createElement('a'); a.href=url; a.download=cleanedName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+
+    function copySQL() {
+      const sql = document.getElementById('sql-output').textContent;
+      navigator.clipboard.writeText(sql).then(()=>{ const btn=event.target; btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy SQL',1500); });
+    }
+
+    function resetAll() {
+      selectedFile=cleanedBlob=cleanedName=previewData=null;
+      document.getElementById('file-input').value='';
+      document.getElementById('file-badge').classList.remove('visible');
+      document.getElementById('btn-preview').style.display='none';
+      document.getElementById('preview-sec').style.display='none';
+      document.getElementById('clean-sec').style.display='none';
+      document.getElementById('loading-clean').classList.remove('visible');
+      document.getElementById('loading-preview').classList.remove('visible');
+      document.getElementById('clean-actions').style.display='flex';
+      hideErr(); setStep('upload');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function setStep(step) {
+      const map = {upload:'st-upload',preview:'st-preview',clean:'st-clean',result:'st-result'};
+      const ord = ['upload','preview','clean','result'];
+      const idx = ord.indexOf(step);
+      ord.forEach((s,i)=>{ const el=document.getElementById(map[s]); el.classList.remove('active','done'); if(i<idx)el.classList.add('done'); if(i===idx)el.classList.add('active'); });
+    }
+
+    function setLdr(ldrId, lblId, on, msgs=[]) {
+      const el = document.getElementById(ldrId); const lbl = document.getElementById(lblId);
+      el.classList.toggle('visible', on); clearInterval(el._t);
+      if (on&&msgs.length) { let i=0; lbl.textContent=msgs[0]; el._t=setInterval(()=>{ i=(i+1)%msgs.length; lbl.textContent=msgs[i]; },1200); }
+    }
+
+    function showErr(msg) { const e=document.getElementById('error-box'); e.textContent='⚠  '+msg; e.classList.add('visible'); }
+    function hideErr() { document.getElementById('error-box').classList.remove('visible'); }
+
+    function hlSQL(sql) {
+      const kw = ['CREATE','TABLE','AS','SELECT','FROM','WHERE','UPDATE','SET','CASE','WHEN','THEN','ELSE','END','INSERT','INTO','AND','OR','NOT','NULL','IS','COALESCE','MIN','MAX','AVG','COUNT','DISTINCT','ORDER','BY','LIMIT','BEGIN','COMMIT','TRANSACTION','DELETE','JOIN','LEFT','RIGHT','INNER','OUTER','ON','GROUP','HAVING'];
+      let out = sql.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      kw.forEach(k => { out = out.replace(new RegExp(`\\b${k}\\b`,'g'),`<span class="sql-keyword">${k}</span>`); });
+      return out;
+    }
+
+    function fmtBytes(b) {
+      if (b<1024) return b+' B'; if (b<1048576) return (b/1024).toFixed(1)+' KB';
+      return (b/1048576).toFixed(1)+' MB';
+    }
+  </script>
+</body>
+</html>

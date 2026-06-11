@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode:"class",
+      theme:{extend:{
+        colors:{
+          "text-primary":"#f5f4f0","primary-fixed-dim":"#e4c600","background":"#131313",
+          "on-primary":"#393000","on-surface":"#e5e2e1","surface-container":"#201f1f",
+          "surface-container-lowest":"#0e0e0e","status-error":"#e57373",
+          "on-surface-variant":"#cfc6ab","primary-fixed":"#ffe250","text-secondary":"#777777",
+          "surface":"#131313","on-primary-container":"#685900","surface-variant":"#353534",
+          "primary-container":"#f0d000","accent-hover":"#c9ae00",
+          "surface-container-highest":"#353534","surface-container-low":"#1c1b1b",
+          "on-primary-fixed":"#211b00","primary":"#ffeda4","border-base":"#262626",
+          "border-muted":"#2e2e2e","secondary":"#c8c6c5","surface-container-high":"#2a2a2a",
+          "surface-tertiary":"#242424",
+        },
+        borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+        spacing:{"gutter":"1px","gap-sm":"8px","container-max":"1100px","gap-md":"16px","gap-lg":"24px","margin-desktop":"32px","margin-mobile":"16px"},
+        fontFamily:{"label-sm":["DM Mono"],"label-md":["DM Mono"],"micro-tag":["DM Mono"],"ui-header":["Syne"],"headline-sm":["Syne"],"headline-lg":["Syne"],"headline-lg-mobile":["Syne"],"body-md":["DM Mono"]},
+        fontSize:{
+          "label-sm":["10px",{lineHeight:"1.4",fontWeight:"500"}],
+          "label-md":["11px",{lineHeight:"1.5",fontWeight:"400"}],
+          "micro-tag":["9px",{lineHeight:"1.2",fontWeight:"500"}],
+          "ui-header":["16px",{lineHeight:"1.4",fontWeight:"700"}],
+          "headline-sm":["21px",{lineHeight:"1.2",fontWeight:"800"}],
+          "headline-lg":["36px",{lineHeight:"1.1",fontWeight:"800"}],
+          "headline-lg-mobile":["32px",{lineHeight:"1.1",fontWeight:"800"}],
+          "body-md":["12px",{lineHeight:"1.8",fontWeight:"400"}],
+        }
+      }}
+    };
+  </script>
+  <style>
+    body{background:#131313;color:#f5f4f0;min-height:100vh;display:flex;flex-direction:column;}
+    body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.04;pointer-events:none;z-index:9999;}
+    .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;-webkit-font-smoothing:antialiased;}
+    /* table */
+    .hist-table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px;}
+    .hist-table th{background:#1a1a1a;color:#777;padding:12px 16px;text-transform:uppercase;letter-spacing:.08em;font-size:10px;border-bottom:1px solid #262626;white-space:nowrap;}
+    .hist-table td{padding:14px 16px;border-bottom:1px solid #1e1e1e;vertical-align:top;color:#ddd;}
+    .hist-table tr:last-child td{border-bottom:none;}
+    .hist-table tbody tr{transition:background .15s;}
+    .hist-table tbody tr:hover td{background:rgba(240,208,0,.025);}
+    .hist-table tbody tr:hover .row-title{color:#f0d000;}
+    /* badge */
+    .fmt-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;background:#242424;border:1px solid #2e2e2e;color:#cfc6ab;padding:2px 7px;}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;}
+    .status-badge.done{background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:#4caf50;}
+    /* expand row */
+    .detail-row{display:none;background:#0e0e0e;}
+    .detail-row.open{display:table-row;}
+    .detail-panel{padding:0 0 0 0;}
+    .detail-tabs{display:flex;border-bottom:1px solid #262626;}
+    .detail-tab{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:10px 18px;cursor:pointer;color:#777;border-bottom:2px solid transparent;transition:all .2s;}
+    .detail-tab.active{color:#f0d000;border-bottom-color:#f0d000;}
+    .detail-tab:hover:not(.active){color:#f5f4f0;}
+    .detail-pane{display:none;padding:20px;}
+    .detail-pane.active{display:block;}
+    /* context table */
+    .ctx-table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px;}
+    .ctx-table th{background:#1a1a1a;color:#777;padding:8px 12px;text-transform:uppercase;font-size:9px;letter-spacing:.08em;border-bottom:1px solid #262626;}
+    .ctx-table td{padding:8px 12px;border-bottom:1px solid #1e1e1e;color:#ccc;}
+    /* sql */
+    .sql-block{background:#0f0f0f;border:1px solid #262626;overflow-x:auto;}
+    .sql-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #262626;background:#1a1a1a;}
+    .sql-header span{font-family:'DM Mono',monospace;font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.1em;}
+    .sql-pre{padding:16px;font-family:'DM Mono',monospace;font-size:11px;color:#f5f4f0;line-height:1.7;white-space:pre-wrap;word-break:break-all;}
+    .sql-kw{color:#f0d000;font-weight:500;}
+    .reasoning-box{background:#1a1a1a;border:1px solid #262626;padding:16px 20px;font-family:'DM Mono',monospace;font-size:11px;color:#999;line-height:1.8;}
+    /* actions */
+    .action-btn{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:6px 12px;border:1px solid #262626;background:transparent;cursor:pointer;transition:all .2s;color:#777;}
+    .action-btn:hover{color:#f5f4f0;border-color:#555;}
+    .action-btn.yellow:hover{color:#f0d000;border-color:#f0d000;}
+    .action-btn.red:hover{color:#e57373;border-color:rgba(229,115,115,.5);background:rgba(229,115,115,.05);}
+    /* toast */
+    .toast{position:fixed;bottom:24px;right:24px;z-index:9998;padding:12px 20px;background:#201f1f;border:1px solid #262626;font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);}
+    .toast.visible{transform:translateY(0);opacity:1;}
+    .toast.success{border-color:rgba(76,175,80,.4);color:#4caf50;}
+    .toast.error{border-color:rgba(229,115,115,.4);color:#e57373;}
+    /* tab switcher */
+    .section-tab{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:8px 18px;cursor:pointer;color:#777;border-bottom:2px solid transparent;transition:all .2s;}
+    .section-tab.active{color:#f0d000;border-bottom-color:#f0d000;}
+    /* confirm modal */
+    .confirm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:300;align-items:center;justify-content:center;}
+    .confirm-modal.open{display:flex;}
+    /* loading skeleton */
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .skeleton{background:linear-gradient(90deg,#1a1a1a 25%,#242424 50%,#1a1a1a 75%);background-size:200%;animation:shimmer 1.4s infinite;height:14px;border-radius:1px;}
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- NAV -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="main.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <a href="main.html"      class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+        <a href="dashboard.html" class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Dashboard</a>
+        <a href="history.html"   class="text-primary-container font-label-md text-label-md border-b border-primary-container px-3 py-1">History</a>
+        <a href="account-settings.html" class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[160px]"></span>
+        <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:14px">logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-14 flex flex-col gap-10">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-3 flex items-center gap-2">
+          <span class="w-4 h-px bg-primary-container inline-block"></span>Session Archive
+        </p>
+        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">History</h1>
+        <p class="font-body-md text-body-md text-text-secondary max-w-xl">All your cleaning sessions and saved dashboards, sorted by most recent.</p>
+      </div>
+      <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors flex items-center gap-2 self-start md:self-auto no-underline">
+        <span class="material-symbols-outlined" style="font-size:16px">add</span>New Session
+      </a>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="flex border-b border-border-base">
+      <button class="section-tab active" id="tab-cleaning" onclick="switchTab('cleaning')">
+        <span class="material-symbols-outlined align-middle mr-1" style="font-size:13px">cleaning_services</span>Cleaning History
+      </button>
+      <button class="section-tab" id="tab-dashboard" onclick="switchTab('dashboard')">
+        <span class="material-symbols-outlined align-middle mr-1" style="font-size:13px">dashboard</span>Dashboard History
+      </button>
+    </div>
+
+    <!-- ═══ CLEANING HISTORY ═══ -->
+    <div id="section-cleaning">
+      <!-- Loading skeletons -->
+      <div id="loading-skeletons" class="border border-border-base bg-surface-container-low p-5 space-y-4">
+        <div class="skeleton w-full"></div>
+        <div class="skeleton w-3/4"></div>
+        <div class="skeleton w-5/6"></div>
+        <div class="skeleton w-2/3"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-cleaning" class="hidden flex flex-col items-center justify-center py-20 border border-border-base border-dashed text-center">
+        <span class="material-symbols-outlined text-border-base mb-4" style="font-size:40px">history</span>
+        <p class="font-ui-header text-ui-header text-text-secondary mb-2">No cleaning sessions yet</p>
+        <p class="font-body-md text-body-md text-text-secondary mb-6">Upload and clean a dataset to see your history here.</p>
+        <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors no-underline">Start Cleaning</a>
+      </div>
+
+      <!-- Table -->
+      <div id="cleaning-table-wrap" class="hidden w-full bg-surface-container-low border border-border-base overflow-x-auto">
+        <table class="hist-table" id="cleaning-table">
+          <thead>
+            <tr>
+              <th style="min-width:220px">Session</th>
+              <th style="min-width:130px">File</th>
+              <th style="min-width:80px">Format</th>
+              <th style="min-width:80px">Size</th>
+              <th style="min-width:100px">Rows</th>
+              <th style="min-width:140px">Date</th>
+              <th style="min-width:160px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cleaning-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARD HISTORY ═══ -->
+    <div id="section-dashboard" class="hidden">
+      <div id="empty-dashboard" class="hidden flex flex-col items-center justify-center py-20 border border-border-base border-dashed text-center">
+        <span class="material-symbols-outlined text-border-base mb-4" style="font-size:40px">dashboard</span>
+        <p class="font-ui-header text-ui-header text-text-secondary mb-2">No saved dashboards</p>
+        <p class="font-body-md text-body-md text-text-secondary mb-6">Build and save a dashboard in the Dashboard page to see it here.</p>
+        <a href="dashboard.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors no-underline">Open Dashboard</a>
+      </div>
+      <div id="dashboard-table-wrap" class="hidden w-full bg-surface-container-low border border-border-base overflow-x-auto">
+        <table class="hist-table" id="dashboard-table">
+          <thead>
+            <tr>
+              <th style="min-width:200px">Dashboard Name</th>
+              <th style="min-width:180px">Base Dataset</th>
+              <th style="min-width:120px">Chart Type</th>
+              <th style="min-width:140px">Saved At</th>
+              <th style="min-width:160px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dashboard-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Confirm delete modal -->
+  <div id="confirm-modal" class="confirm-modal">
+    <div class="w-full max-w-[400px] bg-surface-container-lowest border border-border-base p-8 mx-4">
+      <div class="flex items-start gap-3 mb-6">
+        <span class="material-symbols-outlined text-status-error mt-0.5" style="font-size:20px">warning</span>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-text-primary" style="font-size:18px">Delete Session</h3>
+          <p id="confirm-msg" class="font-body-md text-body-md text-text-secondary mt-1">This will permanently delete this record and its stored file.</p>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeConfirm()" class="font-ui-header text-ui-header border border-border-base text-text-secondary px-5 py-2 hover:border-text-primary hover:text-text-primary transition-all">Cancel</button>
+        <button id="confirm-ok-btn" class="font-ui-header text-ui-header bg-status-error text-white px-5 py-2 hover:bg-red-600 transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:16px">delete</span>Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span class="material-symbols-outlined" id="toast-icon" style="font-size:16px">check_circle</span>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="main.html"      class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Clean</a>
+        <a href="dashboard.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    function authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('dafine_token')}` }; }
+    function logout()       { localStorage.clear(); window.location.href = 'login.html'; }
+    function requireAuth()  { if (!localStorage.getItem('dafine_token')) window.location.href = 'login.html'; }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    let confirmCallback = null;
+
+    (function init() {
+      requireAuth();
+      const email = localStorage.getItem('dafine_email');
+      if (email) document.getElementById('nav-email').textContent = email;
+      loadCleaningHistory();
+    })();
+
+    function switchTab(tab) {
+      ['cleaning','dashboard'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('active', t===tab);
+        document.getElementById(`section-${t}`).classList.toggle('hidden', t!==tab);
+      });
+      if (tab === 'dashboard') loadDashboardHistory();
+    }
+
+    // ══ CLEANING HISTORY ══
+    async function loadCleaningHistory() {
+      try {
+        const r = await fetch(`${API}/history`, { headers: authHeaders() });
+        if (r.status === 401) { logout(); return; }
+        const d = await r.json();
+        const list = d.history || [];
+
+        document.getElementById('loading-skeletons').style.display = 'none';
+
+        if (!list.length) {
+          document.getElementById('empty-cleaning').classList.remove('hidden');
+          return;
+        }
+        document.getElementById('cleaning-table-wrap').classList.remove('hidden');
+        const tbody = document.getElementById('cleaning-tbody');
+        tbody.innerHTML = list.map(h => buildCleaningRow(h)).join('');
+      } catch(e) {
+        document.getElementById('loading-skeletons').style.display = 'none';
+        showToast('Failed to load history.','error');
+      }
+    }
+
+    function buildCleaningRow(h) {
+      const sizeMB  = h.original_file_size ? `${(h.original_file_size/1048576).toFixed(2)} MB` : '—';
+      const dateStr = new Date(h.created_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const ctxData = h.column_context?.context ? JSON.stringify(h.column_context.context) : null;
+      const sql     = h.ai_output?.sql_query || '';
+      const reason  = h.ai_output?.explanation || '';
+
+      return `
+      <tr id="row-${h.id}">
+        <td>
+          <div class="row-title font-bold text-text-primary transition-colors" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px">${esc(h.title||h.original_file_name)}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <span class="status-badge done"><span class="material-symbols-outlined" style="font-size:10px">check_circle</span>Completed</span>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:#777">${h.rows_before||0} → ${h.rows_after||0} rows</span>
+          </div>
+        </td>
+        <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ccc">${esc(h.original_file_name)}</span></td>
+        <td><span class="fmt-badge">${esc((h.original_file_type||'').toUpperCase())}</span></td>
+        <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:#999">${sizeMB}</span></td>
+        <td>
+          <div style="font-family:'DM Mono',monospace;font-size:11px">
+            <span style="color:#777">${(h.rows_before||0).toLocaleString()}</span>
+            <span style="color:#444;margin:0 4px">→</span>
+            <span style="color:#4caf50">${(h.rows_after||0).toLocaleString()}</span>
+          </div>
+        </td>
+        <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:#777">${dateStr}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="action-btn yellow" onclick="toggleDetail(${h.id})" title="View details">
+              <span class="material-symbols-outlined" style="font-size:13px">expand_more</span>Details
+            </button>
+            <button class="action-btn yellow" onclick="downloadFile(${h.id})" title="Download CSV">
+              <span class="material-symbols-outlined" style="font-size:13px">download</span>
+            </button>
+            <button class="action-btn red" onclick="confirmDelete(${h.id},'${esc(h.title||h.original_file_name)}')" title="Delete">
+              <span class="material-symbols-outlined" style="font-size:13px">delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr id="detail-${h.id}" class="detail-row">
+        <td colspan="7" style="padding:0">
+          <div class="detail-panel">
+            <div class="detail-tabs">
+              <div class="detail-tab active" data-tab="ctx-${h.id}" onclick="switchDetailTab(${h.id},'ctx')">
+                <span class="material-symbols-outlined align-middle mr-1" style="font-size:12px">label</span>Column Context
+              </div>
+              <div class="detail-tab" data-tab="sql-${h.id}" onclick="switchDetailTab(${h.id},'sql')">
+                <span class="material-symbols-outlined align-middle mr-1" style="font-size:12px">code</span>SQL Query
+              </div>
+              <div class="detail-tab" data-tab="reason-${h.id}" onclick="switchDetailTab(${h.id},'reason')">
+                <span class="material-symbols-outlined align-middle mr-1" style="font-size:12px">psychology</span>AI Reasoning
+              </div>
+            </div>
+            <!-- Context pane -->
+            <div id="pane-ctx-${h.id}" class="detail-pane active">
+              ${buildContextPane(h.column_context?.context)}
+            </div>
+            <!-- SQL pane (masked by default) -->
+            <div id="pane-sql-${h.id}" class="detail-pane">
+              <div style="position:relative">
+                <div id="sql-masked-${h.id}" style="position:absolute;inset:0;background:rgba(13,13,13,.85);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10">
+                  <span class="material-symbols-outlined" style="font-size:28px;color:#555">visibility_off</span>
+                  <p style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#f5f4f0">SQL hidden for security</p>
+                  <button onclick="unmaskSQL(${h.id})" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;background:#f0d000;color:#0f0f0f;border:none;padding:8px 20px;cursor:pointer">Reveal SQL</button>
+                </div>
+                <div class="sql-block" style="min-height:120px">
+                  <div class="sql-header">
+                    <span>DuckDB Query — executed by backend</span>
+                    <button onclick="copyText('sql-pre-${h.id}')" style="font-family:'DM Mono',monospace;font-size:10px;color:#777;background:none;border:1px solid #262626;padding:3px 10px;cursor:pointer;transition:color .2s" onmouseover="this.style.color='#f5f4f0'" onmouseout="this.style.color='#777'">Copy</button>
+                  </div>
+                  <pre id="sql-pre-${h.id}" class="sql-pre">${hlSQL(esc(sql))}</pre>
+                </div>
+              </div>
+            </div>
+            <!-- Reasoning pane (masked by default) -->
+            <div id="pane-reason-${h.id}" class="detail-pane">
+              <div style="position:relative">
+                <div id="reason-masked-${h.id}" style="position:absolute;inset:0;background:rgba(13,13,13,.85);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10">
+                  <span class="material-symbols-outlined" style="font-size:28px;color:#555">visibility_off</span>
+                  <p style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#f5f4f0">Reasoning hidden for security</p>
+                  <button onclick="unmaskReason(${h.id})" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;background:#f0d000;color:#0f0f0f;border:none;padding:8px 20px;cursor:pointer">Reveal Reasoning</button>
+                </div>
+                <div class="reasoning-box" style="min-height:100px">${esc(reason)||'<span style="color:#555;font-style:italic">No reasoning available.</span>'}</div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    function buildContextPane(ctx) {
+      if (!ctx || typeof ctx !== 'object' || !Object.keys(ctx).length) {
+        return `<div style="padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:#555;font-style:italic">No column context was provided for this session.</div>`;
+      }
+      const rows = Object.entries(ctx).map(([col, val]) =>
+        `<tr><td style="font-weight:600;color:#f5f4f0">${esc(col)}</td><td>${esc(val)}</td></tr>`
+      ).join('');
+      return `<table class="ctx-table"><thead><tr><th>Column</th><th>Context / Description</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function toggleDetail(id) {
+      const row = document.getElementById(`detail-${id}`);
+      const btn = document.querySelector(`#row-${id} .action-btn`);
+      const isOpen = row.classList.toggle('open');
+      if (btn) btn.querySelector('.material-symbols-outlined').textContent = isOpen ? 'expand_less' : 'expand_more';
+    }
+
+    function switchDetailTab(id, pane) {
+      const panes = ['ctx','sql','reason'];
+      panes.forEach(p => {
+        document.getElementById(`pane-${p}-${id}`)?.classList.toggle('active', p===pane);
+        const tab = document.querySelector(`[data-tab="${p}-${id}"]`);
+        if (tab) tab.classList.toggle('active', p===pane);
+      });
+    }
+
+    function unmaskSQL(id)    { document.getElementById(`sql-masked-${id}`)?.remove(); }
+    function unmaskReason(id) { document.getElementById(`reason-masked-${id}`)?.remove(); }
+
+    function copyText(preId) {
+      const el = document.getElementById(preId);
+      if (el) navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied to clipboard.','success'));
+    }
+
+    function hlSQL(sql) {
+      const kw = ['CREATE','TABLE','AS','SELECT','FROM','WHERE','UPDATE','SET','CASE','WHEN','THEN','ELSE','END','INSERT','INTO','AND','OR','NOT','NULL','IS','COALESCE','MIN','MAX','AVG','COUNT','DISTINCT','ORDER','BY','LIMIT','BEGIN','COMMIT','TRANSACTION','DELETE','JOIN','LEFT','RIGHT','INNER','OUTER','ON','GROUP','HAVING'];
+      let out = sql;
+      kw.forEach(k => { out = out.replace(new RegExp(`\\b${k}\\b`,'g'),`<span class="sql-kw">${k}</span>`); });
+      return out;
+    }
+
+    async function downloadFile(id) {
+      showToast('Preparing download…','success');
+      try {
+        const r = await fetch(`${API}/history/${id}/download`, { headers: authHeaders() });
+        if (!r.ok) { showToast('Download failed.','error'); return; }
+        const blob = await r.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a'); a.href=url; a.download=`cleaned_${id}.csv`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+        showToast('Download started.','success');
+      } catch { showToast('Download failed.','error'); }
+    }
+
+    function confirmDelete(id, title) {
+      document.getElementById('confirm-msg').textContent = `"${title}" and its stored file will be permanently deleted.`;
+      confirmCallback = async () => {
+        closeConfirm();
+        try {
+          const r = await fetch(`${API}/history/${id}`,{ method:'DELETE', headers:authHeaders() });
+          if (!r.ok) { showToast('Delete failed.','error'); return; }
+          // remove rows
+          document.getElementById(`row-${id}`)?.remove();
+          document.getElementById(`detail-${id}`)?.remove();
+          showToast('Session deleted.','success');
+          // check if empty
+          if (!document.querySelector('#cleaning-tbody tr')) {
+            document.getElementById('cleaning-table-wrap').classList.add('hidden');
+            document.getElementById('empty-cleaning').classList.remove('hidden');
+          }
+        } catch { showToast('Delete failed.','error'); }
+      };
+      document.getElementById('confirm-modal').classList.add('open');
+      document.getElementById('confirm-ok-btn').onclick = confirmCallback;
+    }
+    function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
+    document.getElementById('confirm-modal').addEventListener('click', e => { if (e.target===document.getElementById('confirm-modal')) closeConfirm(); });
+
+    // ══ DASHBOARD HISTORY ══
+    function loadDashboardHistory() {
+      const saved  = JSON.parse(localStorage.getItem('dafine_dashboards')||'[]');
+      const tbody  = document.getElementById('dashboard-tbody');
+
+      if (!saved.length) {
+        document.getElementById('empty-dashboard').classList.remove('hidden');
+        document.getElementById('dashboard-table-wrap').classList.add('hidden');
+        return;
+      }
+      document.getElementById('empty-dashboard').classList.add('hidden');
+      document.getElementById('dashboard-table-wrap').classList.remove('hidden');
+
+      tbody.innerHTML = saved.map((d,i) => {
+        const date = new Date(d.savedAt).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        return `<tr id="dbrow-${i}">
+          <td><span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#f5f4f0">${esc(d.title)}</span></td>
+          <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ccc">Session #${d.historyId}</span></td>
+          <td><span class="fmt-badge">${esc((d.chartType||'bar').toUpperCase())}</span></td>
+          <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:#777">${date}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="dashboard.html?history_id=${d.historyId}" class="action-btn yellow" style="text-decoration:none">
+                <span class="material-symbols-outlined" style="font-size:13px">open_in_new</span>Open
+              </a>
+              <button class="action-btn red" onclick="deleteDashboard(${i},'${esc(d.title)}')">
+                <span class="material-symbols-outlined" style="font-size:13px">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function deleteDashboard(idx, title) {
+      confirmCallback = () => {
+        closeConfirm();
+        const saved = JSON.parse(localStorage.getItem('dafine_dashboards')||'[]');
+        saved.splice(idx, 1);
+        localStorage.setItem('dafine_dashboards', JSON.stringify(saved));
+        showToast(`"${title}" deleted.`,'success');
+        loadDashboardHistory();
+      };
+      document.getElementById('confirm-msg').textContent = `Dashboard "${title}" will be removed from your saved dashboards.`;
+      document.getElementById('confirm-modal').classList.add('open');
+      document.getElementById('confirm-ok-btn').onclick = confirmCallback;
+    }
+
+    let toastTimer;
+    function showToast(msg, type='success') {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-icon').textContent = type==='success'?'check_circle':'error';
+      document.getElementById('toast-text').textContent = msg;
+      t.className = `toast ${type} visible`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>t.classList.remove('visible'),3200);
+    }
+  </script>
+</body>
+</html>

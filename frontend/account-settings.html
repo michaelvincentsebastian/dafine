@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Account Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-primary": "#f5f4f0", "primary-fixed-dim": "#e4c600",
+            "background": "#131313", "on-primary": "#393000",
+            "on-surface": "#e5e2e1", "surface-container": "#201f1f",
+            "surface-container-lowest": "#0e0e0e", "on-background": "#e5e2e1",
+            "status-error": "#e57373", "on-surface-variant": "#cfc6ab",
+            "primary-fixed": "#ffe250", "text-secondary": "#777777",
+            "surface": "#131313", "surface-bright": "#3a3939",
+            "on-primary-container": "#685900", "surface-variant": "#353534",
+            "primary-container": "#f0d000", "accent-hover": "#c9ae00",
+            "surface-container-highest": "#353534", "surface-container-low": "#1c1b1b",
+            "on-primary-fixed": "#211b00", "primary": "#ffeda4",
+            "border-base": "#262626", "border-muted": "#2e2e2e",
+            "secondary": "#c8c6c5", "surface-container-high": "#2a2a2a",
+            "surface-tertiary": "#242424",
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          spacing: { "gutter": "1px", "gap-sm": "8px", "container-max": "1100px", "gap-md": "16px", "gap-lg": "24px", "margin-desktop": "32px", "margin-mobile": "16px" },
+          fontFamily: { "label-sm": ["DM Mono"], "label-md": ["DM Mono"], "micro-tag": ["DM Mono"], "ui-header": ["Syne"], "headline-sm": ["Syne"], "headline-lg": ["Syne"], "headline-lg-mobile": ["Syne"], "body-md": ["DM Mono"] },
+          fontSize: {
+            "label-sm": ["10px", { lineHeight: "1.4", fontWeight: "500" }],
+            "label-md": ["11px", { lineHeight: "1.5", fontWeight: "400" }],
+            "micro-tag": ["9px", { lineHeight: "1.2", fontWeight: "500" }],
+            "ui-header": ["16px", { lineHeight: "1.4", fontWeight: "700" }],
+            "headline-sm": ["21px", { lineHeight: "1.2", fontWeight: "800" }],
+            "headline-lg": ["36px", { lineHeight: "1.1", fontWeight: "800" }],
+            "headline-lg-mobile": ["32px", { lineHeight: "1.1", fontWeight: "800" }],
+            "body-md": ["12px", { lineHeight: "1.8", fontWeight: "400" }],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #131313; color: #f5f4f0; min-height: 100vh; display: flex; flex-direction: column; }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.04; pointer-events: none; z-index: 9999;
+    }
+    .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; -webkit-font-smoothing: antialiased; }
+    input[type="email"], input[type="password"], input[type="text"] {
+      background-color: #1c1b1b; outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: #f0d000 !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9998; padding: 12px 20px; background: #201f1f; border: 1px solid #262626; font-family: 'DM Mono', monospace; font-size: 11px; display: flex; align-items: center; gap-8px: 8px; gap: 8px; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .toast.visible { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(76,175,80,0.4); color: #4caf50; }
+    .toast.error   { border-color: rgba(229,115,115,0.4); color: #e57373; }
+    .api-key-badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 2px; }
+    .api-key-badge.set    { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: #4caf50; }
+    .api-key-badge.unset  { background: rgba(229,115,115,0.1); border: 1px solid rgba(229,115,115,0.3); color: #e57373; }
+    .change-pw-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+    .change-pw-modal.open { display: flex; }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- Nav -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="main.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <a href="main.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+        <a href="dashboard.html" class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Dashboard</a>
+        <a href="history.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
+        <a href="account-settings.html" class="text-primary-container font-label-md text-label-md px-3 py-1 border-b border-primary-container">Account</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[160px]"></span>
+        <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">logout</span>
+          <span class="hidden md:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-14 flex flex-col gap-16">
+    <!-- Header -->
+    <header>
+      <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-3 flex items-center gap-2">
+        <span class="w-4 h-px bg-primary-container inline-block"></span>User Configuration
+      </p>
+      <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">Account Settings</h1>
+      <p class="font-body-md text-body-md text-text-secondary max-w-xl">Manage your login credentials and external API integrations used during data refinement.</p>
+    </header>
+
+    <!-- Bento grid -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter bg-border-base p-gutter">
+
+      <!-- Profile card (7 cols) -->
+      <section class="col-span-1 md:col-span-7 bg-surface p-gap-lg flex flex-col gap-gap-lg">
+        <div class="flex items-center gap-2 border-b border-border-base pb-4">
+          <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 0">person</span>
+          <h2 class="font-ui-header text-ui-header text-text-primary">Profile Details</h2>
+        </div>
+        <!-- Email display -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Email Address</label>
+          <div class="w-full bg-surface-container-low border border-border-muted px-4 py-3 font-body-md text-body-md text-text-secondary flex items-center justify-between">
+            <span id="display-email">Loading...</span>
+            <span class="material-symbols-outlined text-[14px] text-text-secondary" style="font-variation-settings:'FILL' 0">lock</span>
+          </div>
+          <p class="font-micro-tag text-micro-tag text-text-secondary">Email address cannot be changed.</p>
+        </div>
+        <!-- Member since -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Member Since</label>
+          <div class="w-full bg-surface-container-low border border-border-muted px-4 py-3 font-body-md text-body-md text-text-secondary">
+            <span id="display-created">—</span>
+          </div>
+        </div>
+        <div class="mt-4 border-t border-border-base pt-6 flex justify-end">
+          <button onclick="openChangePw()"
+            class="font-ui-header text-ui-header bg-transparent text-text-primary border border-border-base px-6 py-3 hover:border-text-primary hover:bg-surface-variant transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">key</span>
+            Change Password
+          </button>
+        </div>
+      </section>
+
+      <!-- API Key card (5 cols) -->
+      <section class="col-span-1 md:col-span-5 bg-surface p-gap-lg flex flex-col gap-gap-lg">
+        <div class="flex items-center justify-between border-b border-border-base pb-4">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 0">api</span>
+            <h2 class="font-ui-header text-ui-header text-text-primary">API Integration</h2>
+          </div>
+          <div id="api-key-badge" class="api-key-badge unset">
+            <span class="material-symbols-outlined text-[12px]">circle</span>
+            <span id="api-key-badge-label">Not set</span>
+          </div>
+        </div>
+        <p class="font-body-md text-body-md text-text-secondary">Provide your OpenRouter API key to power AI-driven data cleaning. Keys are stored encrypted (AES-256-GCM) and never exposed.</p>
+        <div class="flex flex-col gap-2 flex-grow">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider" for="openrouter-key">OpenRouter API Key</label>
+          <div class="relative">
+            <input id="openrouter-key" type="password" placeholder="sk-or-v1-..."
+              class="w-full border border-border-base px-4 py-3 pr-12 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+            <button type="button" onclick="togglePw('openrouter-key','eye-key')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors">
+              <span id="eye-key" class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 0">visibility</span>
+            </button>
+          </div>
+          <p class="font-micro-tag text-micro-tag text-text-secondary">Must start with <code class="text-primary-container">sk-or-</code>. Get yours at openrouter.ai.</p>
+        </div>
+        <div class="mt-auto border-t border-border-base pt-6">
+          <button onclick="saveApiKey()"
+            class="w-full font-ui-header text-ui-header bg-primary-container text-on-primary-container px-6 py-3 hover:bg-accent-hover transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span id="save-key-text">Save API Key</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Danger zone -->
+      <section class="col-span-1 md:col-span-12 bg-surface p-gap-lg flex flex-col gap-4">
+        <div class="flex items-center gap-2 border-b border-border-base pb-4">
+          <span class="material-symbols-outlined text-status-error" style="font-variation-settings:'FILL' 0">warning</span>
+          <h2 class="font-ui-header text-ui-header text-text-primary">Session</h2>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-body-md text-body-md text-text-primary mb-1">Sign out of your account</p>
+            <p class="font-micro-tag text-micro-tag text-text-secondary uppercase tracking-wider">Your JWT session will be cleared from this browser.</p>
+          </div>
+          <button onclick="logout()"
+            class="font-ui-header text-ui-header text-status-error border border-status-error/40 px-5 py-2 hover:bg-status-error hover:text-white transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">logout</span> Sign Out
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Change Password Modal -->
+  <div id="change-pw-modal" class="change-pw-modal">
+    <div class="w-full max-w-[420px] bg-surface-container-lowest border border-border-base p-8 mx-4 relative">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-headline-sm text-headline-sm text-text-primary">Change Password</h3>
+        <button onclick="closeChangePw()" class="text-text-secondary hover:text-text-primary transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="pw-error" class="hidden mb-4 text-status-error font-body-md text-body-md p-3 bg-status-error/08 border border-status-error/25"></div>
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Current Password</label>
+          <div class="relative">
+            <input id="cur-pw" type="password" placeholder="••••••••" class="w-full border border-border-base px-4 py-3 pr-12 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+            <button type="button" onclick="togglePw('cur-pw','eye-cur')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors">
+              <span id="eye-cur" class="material-symbols-outlined text-[18px]">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">New Password</label>
+          <div class="relative">
+            <input id="new-pw" type="password" placeholder="Min 8 characters" class="w-full border border-border-base px-4 py-3 pr-12 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+            <button type="button" onclick="togglePw('new-pw','eye-new')" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors">
+              <span id="eye-new" class="material-symbols-outlined text-[18px]">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Confirm New Password</label>
+          <input id="conf-pw" type="password" placeholder="••••••••" class="w-full border border-border-base px-4 py-3 font-body-md text-body-md text-text-primary placeholder:text-text-secondary/30" />
+        </div>
+        <button onclick="submitChangePw()"
+          class="font-ui-header text-ui-header bg-primary-container text-on-primary-container w-full py-3 hover:bg-accent-hover transition-colors flex items-center justify-center gap-2 mt-2">
+          <span id="pw-spinner" class="material-symbols-outlined text-[16px] animate-spin hidden">progress_activity</span>
+          Update Password
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span class="material-symbols-outlined text-[16px]" id="toast-icon">check_circle</span>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="#" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Documentation</a>
+        <a href="#" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">API Status</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    function authHeaders() {
+      const token = localStorage.getItem('dafine_token');
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    }
+
+    function logout() {
+      localStorage.removeItem('dafine_token');
+      localStorage.removeItem('dafine_email');
+      localStorage.removeItem('dafine_user_id');
+      window.location.href = 'login.html';
+    }
+
+    function requireAuth() {
+      if (!localStorage.getItem('dafine_token')) window.location.href = 'login.html';
+    }
+
+    async function loadUser() {
+      requireAuth();
+      try {
+        const r = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+        if (r.status === 401) { logout(); return; }
+        const d = await r.json();
+        document.getElementById('display-email').textContent   = d.email;
+        document.getElementById('nav-email').textContent       = d.email;
+        document.getElementById('display-created').textContent = new Date(d.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+        const badge     = document.getElementById('api-key-badge');
+        const badgeLabel = document.getElementById('api-key-badge-label');
+        if (d.has_api_key) {
+          badge.classList.replace('unset','set');
+          badgeLabel.textContent = 'Connected';
+          document.getElementById('save-key-text').textContent = 'Update API Key';
+        }
+      } catch { showToast('Failed to load account info.', 'error'); }
+    }
+
+    async function saveApiKey() {
+      const key = document.getElementById('openrouter-key').value.trim();
+      if (!key) { showToast('Please enter an API key.', 'error'); return; }
+      if (!key.startsWith('sk-or-')) { showToast('Invalid OpenRouter key format. Must start with sk-or-', 'error'); return; }
+      try {
+        const r = await fetch(`${API}/auth/api-key`, {
+          method: 'PUT', headers: authHeaders(), body: JSON.stringify({ api_key: key }),
+        });
+        const d = await r.json();
+        if (!r.ok) { showToast(d.detail || 'Failed to save key.', 'error'); return; }
+        showToast('API key saved and encrypted.', 'success');
+        document.getElementById('openrouter-key').value = '';
+        document.getElementById('api-key-badge').classList.replace('unset','set');
+        document.getElementById('api-key-badge-label').textContent = 'Connected';
+        document.getElementById('save-key-text').textContent = 'Update API Key';
+      } catch { showToast('Network error. Check backend.', 'error'); }
+    }
+
+    function openChangePw()  { document.getElementById('change-pw-modal').classList.add('open'); }
+    function closeChangePw() { document.getElementById('change-pw-modal').classList.remove('open'); document.getElementById('pw-error').classList.add('hidden'); }
+
+    async function submitChangePw() {
+      const cur  = document.getElementById('cur-pw').value;
+      const nw   = document.getElementById('new-pw').value;
+      const conf = document.getElementById('conf-pw').value;
+      const errEl = document.getElementById('pw-error');
+      errEl.classList.add('hidden');
+
+      if (!cur || !nw || !conf) { errEl.textContent = 'All fields required.'; errEl.classList.remove('hidden'); return; }
+      if (nw !== conf)          { errEl.textContent = 'Passwords do not match.'; errEl.classList.remove('hidden'); return; }
+      if (nw.length < 8)        { errEl.textContent = 'Minimum 8 characters required.'; errEl.classList.remove('hidden'); return; }
+
+      document.getElementById('pw-spinner').classList.remove('hidden');
+      try {
+        const r = await fetch(`${API}/auth/password`, {
+          method: 'PUT', headers: authHeaders(),
+          body: JSON.stringify({ current_password: cur, new_password: nw }),
+        });
+        const d = await r.json();
+        if (!r.ok) { errEl.textContent = d.detail || 'Update failed.'; errEl.classList.remove('hidden'); return; }
+        closeChangePw();
+        showToast('Password updated successfully.', 'success');
+        document.getElementById('cur-pw').value = '';
+        document.getElementById('new-pw').value = '';
+        document.getElementById('conf-pw').value = '';
+      } catch { errEl.textContent = 'Network error.'; errEl.classList.remove('hidden'); }
+      finally { document.getElementById('pw-spinner').classList.add('hidden'); }
+    }
+
+    function togglePw(inputId, iconId) {
+      const inp  = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'success') {
+      const t    = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const txt  = document.getElementById('toast-text');
+      t.className = `toast ${type}`;
+      icon.textContent = type === 'success' ? 'check_circle' : 'error';
+      txt.textContent  = msg;
+      t.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('visible'), 3200);
+    }
+
+    loadUser();
+  </script>
+</body>
+</html>

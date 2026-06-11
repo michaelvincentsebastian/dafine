@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode:"class",
+      theme:{extend:{
+        colors:{
+          "text-primary":"#f5f4f0","primary-fixed-dim":"#e4c600","background":"#131313",
+          "on-primary":"#393000","on-surface":"#e5e2e1","surface-container":"#201f1f",
+          "surface-container-lowest":"#0e0e0e","status-error":"#e57373",
+          "on-surface-variant":"#cfc6ab","primary-fixed":"#ffe250","text-secondary":"#777777",
+          "surface":"#131313","on-primary-container":"#685900","surface-variant":"#353534",
+          "primary-container":"#f0d000","accent-hover":"#c9ae00",
+          "surface-container-highest":"#353534","surface-container-low":"#1c1b1b",
+          "primary":"#ffeda4","border-base":"#262626","border-muted":"#2e2e2e",
+          "secondary":"#c8c6c5","surface-container-high":"#2a2a2a","surface-tertiary":"#242424",
+        },
+        borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+        spacing:{"gutter":"1px","gap-sm":"8px","container-max":"1100px","gap-md":"16px","gap-lg":"24px","margin-desktop":"32px","margin-mobile":"16px"},
+        fontFamily:{"label-sm":["DM Mono"],"label-md":["DM Mono"],"micro-tag":["DM Mono"],"ui-header":["Syne"],"headline-sm":["Syne"],"headline-lg":["Syne"],"headline-lg-mobile":["Syne"],"body-md":["DM Mono"]},
+        fontSize:{
+          "label-sm":["10px",{lineHeight:"1.4",fontWeight:"500"}],
+          "label-md":["11px",{lineHeight:"1.5",fontWeight:"400"}],
+          "micro-tag":["9px",{lineHeight:"1.2",fontWeight:"500"}],
+          "ui-header":["16px",{lineHeight:"1.4",fontWeight:"700"}],
+          "headline-sm":["21px",{lineHeight:"1.2",fontWeight:"800"}],
+          "headline-lg":["36px",{lineHeight:"1.1",fontWeight:"800"}],
+          "headline-lg-mobile":["32px",{lineHeight:"1.1",fontWeight:"800"}],
+          "body-md":["12px",{lineHeight:"1.8",fontWeight:"400"}],
+        }
+      }}
+    };
+  </script>
+  <style>
+    body{background:#131313;color:#f5f4f0;min-height:100vh;display:flex;flex-direction:column;}
+    body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.04;pointer-events:none;z-index:9999;}
+    .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;-webkit-font-smoothing:antialiased;}
+    input,select{outline:none;transition:border-color .2s;}
+    input:focus,select:focus{border-color:#f0d000!important;}
+    select option{background:#1c1b1b;color:#f5f4f0;}
+    .chart-type-btn{display:flex;align-items:center;justify-content:center;padding:8px;background:transparent;border:none;color:#777;cursor:pointer;border-radius:2px;transition:all .2s;}
+    .chart-type-btn.active{background:#353534;color:#f0d000;}
+    .chart-type-btn:hover:not(.active){color:#f5f4f0;background:rgba(255,255,255,.05);}
+    .series-row{display:flex;align-items:center;gap:8px;background:#131313;border:1px solid #262626;padding:8px 10px;margin-bottom:4px;}
+    .color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;text-align:center;border:1.5px dashed #262626;}
+    .toast{position:fixed;bottom:24px;right:24px;z-index:9998;padding:12px 20px;background:#201f1f;border:1px solid #262626;font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);}
+    .toast.visible{transform:translateY(0);opacity:1;}
+    .toast.success{border-color:rgba(76,175,80,.4);color:#4caf50;}
+    .toast.error{border-color:rgba(229,115,115,.4);color:#e57373;}
+    /* data table */
+    .dt-wrap{overflow:auto;max-height:300px;border:1px solid #262626;}
+    .dt-wrap table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px;}
+    .dt-wrap th{background:#1a1a1a;color:#777;padding:8px 12px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #262626;white-space:nowrap;position:sticky;top:0;}
+    .dt-wrap td{padding:8px 12px;border-bottom:1px solid #1a1a1a;color:#ddd;white-space:nowrap;}
+    .dt-wrap tr:last-child td{border-bottom:none;}
+    .dt-wrap tr:hover td{background:rgba(240,208,0,.03);}
+    /* select from history modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+    .modal-backdrop.open{display:flex;}
+    .hist-item{padding:14px 18px;border-bottom:1px solid #262626;cursor:pointer;transition:background .15s;}
+    .hist-item:hover{background:rgba(240,208,0,.04);}
+    .hist-item:last-child{border-bottom:none;}
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- NAV -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="main.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <a href="main.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+        <a href="dashboard.html" class="text-primary-container font-label-md text-label-md border-b border-primary-container px-3 py-1">Dashboard</a>
+        <a href="history.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
+        <a href="account-settings.html" class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[160px]"></span>
+        <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:14px">logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-14 flex flex-col gap-10">
+    <!-- Header -->
+    <div>
+      <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-3 flex items-center gap-2">
+        <span class="w-4 h-px bg-primary-container inline-block"></span>Data Explorer
+      </p>
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">Dashboard</h1>
+          <p class="font-body-md text-body-md text-text-secondary max-w-xl">Explore and visualize your cleaned dataset. Select a session from your cleaning history to begin.</p>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+          <button onclick="openHistoryModal()" class="font-ui-header text-ui-header border border-border-base text-text-primary px-5 py-2.5 hover:border-primary-container hover:text-primary-container transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:16px">folder_open</span>Load Dataset
+          </button>
+          <button onclick="saveDashboard()" id="save-btn" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+            <span class="material-symbols-outlined" style="font-size:16px">save</span>Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset info bar -->
+    <div id="dataset-bar" class="hidden border border-border-base bg-surface-container-low px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-primary-container" style="font-size:16px">table_chart</span>
+        <div>
+          <span id="dataset-name" class="font-ui-header text-ui-header text-text-primary text-[13px]">—</span>
+          <span id="dataset-meta" class="font-label-md text-label-md text-text-secondary ml-3">—</span>
+        </div>
+      </div>
+      <span class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest border border-primary-container/30 px-2 py-1">Dataset Loaded</span>
+    </div>
+
+    <!-- Empty state / workspace -->
+    <div id="empty-state" class="empty-state">
+      <span class="material-symbols-outlined text-text-secondary mb-4" style="font-size:40px;font-variation-settings:'FILL' 0">bar_chart</span>
+      <p class="font-ui-header text-ui-header text-text-primary mb-2">No dataset loaded</p>
+      <p class="font-body-md text-body-md text-text-secondary max-w-xs">Complete a data cleaning session first, then load it here to visualize and explore your data.</p>
+      <div class="flex gap-3 mt-6">
+        <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors no-underline flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:16px">cleaning_services</span>Clean a Dataset
+        </a>
+        <button onclick="openHistoryModal()" class="font-ui-header text-ui-header border border-border-base text-text-primary px-5 py-2.5 hover:border-primary-container transition-all flex items-center gap-2">
+          Load from History
+        </button>
+      </div>
+    </div>
+
+    <!-- Workspace (hidden until dataset loaded) -->
+    <div id="workspace" class="hidden flex flex-col gap-8">
+      <!-- Chart + Controls -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter bg-border-base p-gutter">
+        <!-- Chart canvas (8 cols) -->
+        <div class="col-span-1 md:col-span-8 bg-surface flex flex-col" style="min-height:400px">
+          <div class="flex items-center justify-between border-b border-border-base px-5 py-3">
+            <span id="chart-title" class="font-ui-header text-ui-header text-text-primary text-[13px]">Chart Preview</span>
+            <div class="flex items-center gap-2">
+              <span class="font-micro-tag text-micro-tag text-text-secondary uppercase tracking-widest">Chart.js</span>
+            </div>
+          </div>
+          <div class="flex-grow flex items-center justify-center p-6 relative">
+            <div id="chart-placeholder" class="text-center">
+              <span class="material-symbols-outlined text-border-base mb-3" style="font-size:48px">insert_chart</span>
+              <p class="font-body-md text-body-md text-text-secondary">Configure axes in the panel →</p>
+            </div>
+            <canvas id="main-chart" style="display:none;max-height:360px"></canvas>
+          </div>
+        </div>
+
+        <!-- Config panel (4 cols) -->
+        <aside class="col-span-1 md:col-span-4 bg-surface p-gap-lg flex flex-col gap-5">
+          <div class="flex items-center gap-2 border-b border-border-base pb-4">
+            <span class="material-symbols-outlined text-primary-container" style="font-size:16px;font-variation-settings:'FILL' 0">tune</span>
+            <h2 class="font-ui-header text-ui-header text-text-primary">Chart Config</h2>
+          </div>
+
+          <!-- Chart type -->
+          <div class="flex flex-col gap-2">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Chart Type</label>
+            <div class="grid grid-cols-5 gap-1 p-1 bg-background border border-border-base">
+              <button class="chart-type-btn active" data-type="bar" onclick="setChartType('bar')" title="Bar"><span class="material-symbols-outlined" style="font-size:18px">bar_chart</span></button>
+              <button class="chart-type-btn" data-type="line" onclick="setChartType('line')" title="Line"><span class="material-symbols-outlined" style="font-size:18px">show_chart</span></button>
+              <button class="chart-type-btn" data-type="scatter" onclick="setChartType('scatter')" title="Scatter"><span class="material-symbols-outlined" style="font-size:18px">scatter_plot</span></button>
+              <button class="chart-type-btn" data-type="pie" onclick="setChartType('pie')" title="Pie"><span class="material-symbols-outlined" style="font-size:18px">pie_chart</span></button>
+              <button class="chart-type-btn" data-type="doughnut" onclick="setChartType('doughnut')" title="Donut"><span class="material-symbols-outlined" style="font-size:18px">donut_large</span></button>
+            </div>
+          </div>
+
+          <!-- X Axis -->
+          <div class="flex flex-col gap-2">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">X-Axis / Labels</label>
+            <select id="x-axis" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+              <option value="">— select column —</option>
+            </select>
+          </div>
+
+          <!-- Y Axis (multi-series) -->
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Y-Axis / Values</label>
+              <button onclick="addSeries()" class="font-label-sm text-label-sm text-primary-container flex items-center gap-1 hover:text-accent-hover transition-colors">
+                <span class="material-symbols-outlined" style="font-size:14px">add</span> Add
+              </button>
+            </div>
+            <div id="series-list"></div>
+          </div>
+
+          <!-- Aggregation -->
+          <div class="flex flex-col gap-2">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Aggregation</label>
+            <select id="agg-fn" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+              <option value="none">None (raw values)</option>
+              <option value="sum">Sum</option>
+              <option value="avg">Average</option>
+              <option value="count">Count</option>
+              <option value="max">Max</option>
+              <option value="min">Min</option>
+            </select>
+          </div>
+
+          <!-- Display -->
+          <div class="flex flex-col gap-3">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Options</label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="show-legend" type="checkbox" checked class="w-4 h-4 bg-background border-border-base text-primary-container" onchange="renderChart()" />
+              <span class="font-body-md text-body-md text-text-primary">Show Legend</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="show-grid" type="checkbox" checked class="w-4 h-4 bg-background border-border-base text-primary-container" onchange="renderChart()" />
+              <span class="font-body-md text-body-md text-text-primary">Show Gridlines</span>
+            </label>
+          </div>
+
+          <!-- Dashboard title -->
+          <div class="flex flex-col gap-2 mt-auto border-t border-border-base pt-4">
+            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Dashboard Title</label>
+            <input id="dashboard-title" type="text" placeholder="e.g. Q1 Revenue Analysis" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2" />
+          </div>
+        </aside>
+      </div>
+
+      <!-- Data table -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#f0d000;display:flex;align-items:center;gap:12px;">
+            <span style="width:16px;height:1px;background:#f0d000;display:inline-block"></span>Raw Data Preview
+          </div>
+          <span id="row-count" class="font-label-md text-label-md text-text-secondary"></span>
+        </div>
+        <div class="dt-wrap" id="data-table-wrap">
+          <table id="data-table"><thead id="dt-head"></thead><tbody id="dt-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- History picker modal -->
+  <div id="hist-modal" class="modal-backdrop">
+    <div class="w-full max-w-[560px] bg-surface-container-lowest border border-border-base mx-4 flex flex-col" style="max-height:80vh">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-base">
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-text-primary" style="font-size:18px">Select Cleaning Session</h3>
+          <p class="font-body-md text-body-md text-text-secondary">Choose a dataset to load into the dashboard.</p>
+        </div>
+        <button onclick="closeHistoryModal()" class="text-text-secondary hover:text-text-primary transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="hist-list" class="overflow-y-auto flex-grow">
+        <div class="flex items-center justify-center py-12">
+          <span class="font-body-md text-body-md text-text-secondary">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span class="material-symbols-outlined" id="toast-icon" style="font-size:16px">check_circle</span>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="history.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">History</a>
+        <a href="main.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Clean</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost:8000';
+    const SERIES_COLORS = ['#f0d000','#55d6f4','#ff9800','#4caf50','#e040fb','#ff5252','#00bcd4','#8bc34a'];
+
+    let currentHistoryId = null, tableData = [], columns = [], chartType = 'bar', chartInst = null;
+    let seriesCols = [];
+
+    function authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('dafine_token')}` }; }
+    function logout()       { localStorage.clear(); window.location.href = 'login.html'; }
+    function requireAuth()  { if (!localStorage.getItem('dafine_token')) window.location.href = 'login.html'; }
+
+    (function init() {
+      requireAuth();
+      const email = localStorage.getItem('dafine_email');
+      if (email) document.getElementById('nav-email').textContent = email;
+      // If navigated from main.html with a history_id in URL
+      const params = new URLSearchParams(window.location.search);
+      const histId = params.get('history_id');
+      if (histId) loadDataset(parseInt(histId));
+    })();
+
+    // ── History modal ──
+    async function openHistoryModal() {
+      document.getElementById('hist-modal').classList.add('open');
+      try {
+        const r = await fetch(`${API}/history`, { headers: authHeaders() });
+        if (r.status === 401) { logout(); return; }
+        const d = await r.json();
+        const hist = d.history || [];
+        if (!hist.length) {
+          document.getElementById('hist-list').innerHTML = `<div class="flex flex-col items-center justify-center py-12 gap-4"><span style="font-family:'DM Mono';font-size:12px;color:#777">No cleaning sessions yet.</span><a href="main.html" style="font-family:'Syne';font-size:13px;font-weight:700;background:#f0d000;color:#0f0f0f;padding:10px 20px;text-decoration:none">Clean a Dataset</a></div>`;
+          return;
+        }
+        document.getElementById('hist-list').innerHTML = hist.map(h => `
+          <div class="hist-item" onclick="loadDataset(${h.id});closeHistoryModal()">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-family:'Syne';font-size:14px;font-weight:700;color:#f5f4f0">${esc(h.title||h.original_file_name)}</span>
+              <span style="font-family:'DM Mono';font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.1em;background:#242424;border:1px solid #2e2e2e;padding:2px 7px">${esc(h.original_file_type?.toUpperCase()||'')}</span>
+            </div>
+            <div style="font-family:'DM Mono';font-size:10px;color:#777">${esc(h.original_file_name)} · ${new Date(h.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+          </div>`).join('');
+      } catch { showToast('Could not load history.','error'); }
+    }
+    function closeHistoryModal() { document.getElementById('hist-modal').classList.remove('open'); }
+
+    // ── Load dataset from history ──
+    async function loadDataset(histId) {
+      currentHistoryId = histId;
+      showToast('Fetching dataset…','success');
+      try {
+        // Get history entry for meta
+        const hr = await fetch(`${API}/history`, { headers: authHeaders() });
+        const hd = await hr.json();
+        const entry = (hd.history||[]).find(h => h.id === histId);
+
+        // Download CSV bytes
+        const r = await fetch(`${API}/history/${histId}/download`, { headers: authHeaders() });
+        if (!r.ok) { showToast('Failed to load dataset.','error'); return; }
+        const csvText = await r.text();
+        parseCSV(csvText);
+
+        if (entry) {
+          document.getElementById('dataset-name').textContent  = entry.title || entry.original_file_name;
+          document.getElementById('dataset-meta').textContent  = `${tableData.length.toLocaleString()} rows · ${columns.length} cols`;
+        }
+
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('workspace').classList.remove('hidden');
+        document.getElementById('dataset-bar').classList.remove('hidden');
+        document.getElementById('save-btn').disabled = false;
+        document.getElementById('save-btn').classList.remove('opacity-50','cursor-not-allowed');
+
+        populateAxisSelects();
+        renderDataTable();
+        showToast('Dataset loaded.','success');
+      } catch(e) { showToast('Error loading dataset: '+e.message,'error'); }
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      if (!lines.length) return;
+      columns = lines[0].split(',').map(c => c.replace(/^"|"$/g,'').trim());
+      tableData = lines.slice(1).map(line => {
+        const vals = line.split(',');
+        const row = {};
+        columns.forEach((col,i) => { row[col] = vals[i]?.replace(/^"|"$/g,'').trim() || ''; });
+        return row;
+      });
+    }
+
+    function populateAxisSelects() {
+      const opts = columns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      document.getElementById('x-axis').innerHTML = '<option value="">— select column —</option>' + opts;
+      seriesCols = [];
+      document.getElementById('series-list').innerHTML = '';
+      addSeries();
+    }
+
+    function addSeries() {
+      const idx   = seriesCols.length;
+      const color = SERIES_COLORS[idx % SERIES_COLORS.length];
+      seriesCols.push({ col: '', color });
+      const opts  = columns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      const row   = document.createElement('div');
+      row.className = 'series-row'; row.dataset.idx = idx;
+      row.innerHTML = `
+        <div class="color-dot" style="background:${color}"></div>
+        <select style="flex:1;background:transparent;border:none;color:#f5f4f0;font-family:'DM Mono',monospace;font-size:11px;" onchange="seriesCols[${idx}].col=this.value;renderChart()">
+          <option value="">— select column —</option>${opts}
+        </select>
+        <button onclick="removeSeries(${idx})" style="background:none;border:none;color:#777;cursor:pointer;padding:2px" class="hover:text-status-error">
+          <span class="material-symbols-outlined" style="font-size:16px">close</span>
+        </button>`;
+      document.getElementById('series-list').appendChild(row);
+    }
+
+    function removeSeries(idx) {
+      seriesCols[idx] = null;
+      const row = document.querySelector(`[data-idx="${idx}"]`);
+      if (row) row.remove();
+      renderChart();
+    }
+
+    function setChartType(type) {
+      chartType = type;
+      document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`[data-type="${type}"]`).classList.add('active');
+      renderChart();
+    }
+
+    function renderChart() {
+      const xCol   = document.getElementById('x-axis').value;
+      const aggFn  = document.getElementById('agg-fn').value;
+      const active = seriesCols.filter(s => s && s.col);
+      if (!xCol || !active.length) {
+        document.getElementById('chart-placeholder').style.display = 'flex';
+        document.getElementById('main-chart').style.display = 'none';
+        return;
+      }
+      document.getElementById('chart-placeholder').style.display = 'none';
+      document.getElementById('main-chart').style.display = 'block';
+
+      // Build labels
+      let labels, datasets;
+      if (aggFn !== 'none') {
+        // Group by x, aggregate y
+        const groups = {};
+        tableData.forEach(row => {
+          const key = row[xCol] || '(blank)';
+          if (!groups[key]) groups[key] = {};
+          active.forEach(s => {
+            if (!groups[key][s.col]) groups[key][s.col] = [];
+            const v = parseFloat(row[s.col]);
+            if (!isNaN(v)) groups[key][s.col].push(v);
+          });
+        });
+        labels = Object.keys(groups).slice(0, 50);
+        datasets = active.map(s => ({
+          label: s.col, borderColor: s.color, backgroundColor: s.color + '80',
+          data: labels.map(k => {
+            const vals = groups[k][s.col] || [];
+            if (!vals.length) return 0;
+            if (aggFn==='sum')   return vals.reduce((a,b)=>a+b,0);
+            if (aggFn==='avg')   return vals.reduce((a,b)=>a+b,0)/vals.length;
+            if (aggFn==='count') return vals.length;
+            if (aggFn==='max')   return Math.max(...vals);
+            if (aggFn==='min')   return Math.min(...vals);
+          }),
+        }));
+      } else {
+        labels = tableData.slice(0,100).map(r => r[xCol]||'');
+        datasets = active.map(s => ({
+          label: s.col, borderColor: s.color, backgroundColor: s.color + '80',
+          data: tableData.slice(0,100).map(r => { const v=parseFloat(r[s.col]); return isNaN(v)?null:v; }),
+        }));
+      }
+
+      // Pie/doughnut only uses first series
+      if (['pie','doughnut'].includes(chartType) && datasets.length > 0) {
+        datasets = [{
+          ...datasets[0],
+          backgroundColor: labels.map((_,i)=>SERIES_COLORS[i%SERIES_COLORS.length]),
+          borderColor: '#131313', borderWidth: 2,
+        }];
+      }
+
+      const showLegend = document.getElementById('show-legend').checked;
+      const showGrid   = document.getElementById('show-grid').checked;
+      const ctx        = document.getElementById('main-chart').getContext('2d');
+      if (chartInst) chartInst.destroy();
+      chartInst = new Chart(ctx, {
+        type: chartType,
+        data: { labels, datasets },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: {
+            legend: { display: showLegend, labels: { color: '#f5f4f0', font: { family: "'DM Mono',monospace", size: 11 } } },
+            tooltip: { backgroundColor: '#1a1a1a', titleColor: '#f5f4f0', bodyColor: '#777', borderColor: '#262626', borderWidth: 1 },
+          },
+          scales: ['pie','doughnut'].includes(chartType) ? {} : {
+            x: { grid: { display: showGrid, color: '#262626' }, ticks: { color: '#777', font: { family: "'DM Mono',monospace", size: 10 } } },
+            y: { grid: { display: showGrid, color: '#262626' }, ticks: { color: '#777', font: { family: "'DM Mono',monospace", size: 10 } } },
+          },
+        },
+      });
+      // Update chart title
+      const titleParts = active.map(s => s.col).join(', ');
+      document.getElementById('chart-title').textContent = `${titleParts} by ${xCol}`;
+    }
+
+    function renderDataTable() {
+      const rowLimit = 200;
+      document.getElementById('row-count').textContent = `Showing ${Math.min(rowLimit, tableData.length)} of ${tableData.length.toLocaleString()} rows`;
+      document.getElementById('dt-head').innerHTML = `<tr>${columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
+      document.getElementById('dt-body').innerHTML = tableData.slice(0,rowLimit).map(row =>
+        `<tr>${columns.map(c=>`<td>${esc(String(row[c]||''))}</td>`).join('')}</tr>`
+      ).join('');
+    }
+
+    // ── Save dashboard ──
+    async function saveDashboard() {
+      if (!currentHistoryId) { showToast('Load a dataset first.','error'); return; }
+      const title = document.getElementById('dashboard-title').value.trim() || 'Untitled Dashboard';
+      // Backend doesn't have a dashboard endpoint yet — save config to localStorage as interim
+      const config = { historyId: currentHistoryId, title, chartType, xCol: document.getElementById('x-axis').value, series: seriesCols.filter(Boolean), aggFn: document.getElementById('agg-fn').value, savedAt: new Date().toISOString() };
+      const saved = JSON.parse(localStorage.getItem('dafine_dashboards')||'[]');
+      const idx   = saved.findIndex(d => d.historyId === currentHistoryId);
+      if (idx >= 0) saved[idx] = config; else saved.unshift(config);
+      localStorage.setItem('dafine_dashboards', JSON.stringify(saved.slice(0,20)));
+      showToast(`Dashboard "${title}" saved.`,'success');
+    }
+
+    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    let toastTimer;
+    function showToast(msg, type='success') {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-icon').textContent = type==='success'?'check_circle':'error';
+      document.getElementById('toast-text').textContent = msg;
+      t.className = `toast ${type} visible`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>t.classList.remove('visible'),3200);
+    }
+
+    // close modal on backdrop click
+    document.getElementById('hist-modal').addEventListener('click',e=>{if(e.target===document.getElementById('hist-modal'))closeHistoryModal();});
+  </script>
+</body>
+</html>
