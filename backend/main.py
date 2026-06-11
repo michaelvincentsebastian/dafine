@@ -680,3 +680,9 @@ async def get_history(current_user: dict = Depends(get_current_user)):
 @app.get("/")
 def root():
     return {"status": "ok", "service": "Dafine API", "version": "0.2.0"}
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
