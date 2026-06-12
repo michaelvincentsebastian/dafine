@@ -251,7 +251,7 @@
   </footer>
 
   <script>
-    const API = 'http://localhost:8000';
+    const API = 'https://dafine-production.up.railway.app';
 
     function authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('dafine_token')}` }; }
     function logout()       { localStorage.clear(); window.location.href = 'login.html'; }
