@@ -4,29 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dafine — Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>
     tailwind.config = {
-      darkMode:"class",
-      theme:{extend:{
+      darkMode:"class", theme:{extend:{
         colors:{
           "text-primary":"#f5f4f0","primary-fixed-dim":"#e4c600","background":"#131313",
-          "on-primary":"#393000","on-surface":"#e5e2e1","surface-container":"#201f1f",
-          "surface-container-lowest":"#0e0e0e","status-error":"#e57373",
-          "on-surface-variant":"#cfc6ab","primary-fixed":"#ffe250","text-secondary":"#777777",
-          "surface":"#131313","on-primary-container":"#685900","surface-variant":"#353534",
-          "primary-container":"#f0d000","accent-hover":"#c9ae00",
-          "surface-container-highest":"#353534","surface-container-low":"#1c1b1b",
-          "primary":"#ffeda4","border-base":"#262626","border-muted":"#2e2e2e",
-          "secondary":"#c8c6c5","surface-container-high":"#2a2a2a","surface-tertiary":"#242424",
+          "surface-container":"#201f1f","surface-container-lowest":"#0e0e0e","status-error":"#e57373",
+          "text-secondary":"#777777","surface":"#131313","on-primary-container":"#685900",
+          "surface-variant":"#353534","primary-container":"#f0d000","accent-hover":"#c9ae00",
+          "surface-container-low":"#1c1b1b","primary":"#ffeda4","border-base":"#262626",
+          "border-muted":"#2e2e2e","surface-container-high":"#2a2a2a",
         },
-        borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
-        spacing:{"gutter":"1px","gap-sm":"8px","container-max":"1100px","gap-md":"16px","gap-lg":"24px","margin-desktop":"32px","margin-mobile":"16px"},
+        borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem"},
+        spacing:{"container-max":"1100px","margin-desktop":"32px","margin-mobile":"16px","gap-lg":"24px","gutter":"1px"},
         fontFamily:{"label-sm":["DM Mono"],"label-md":["DM Mono"],"micro-tag":["DM Mono"],"ui-header":["Syne"],"headline-sm":["Syne"],"headline-lg":["Syne"],"headline-lg-mobile":["Syne"],"body-md":["DM Mono"]},
         fontSize:{
           "label-sm":["10px",{lineHeight:"1.4",fontWeight:"500"}],
@@ -44,503 +38,832 @@
   <style>
     body{background:#131313;color:#f5f4f0;min-height:100vh;display:flex;flex-direction:column;}
     body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.04;pointer-events:none;z-index:9999;}
-    .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;-webkit-font-smoothing:antialiased;}
-    input,select{outline:none;transition:border-color .2s;}
-    input:focus,select:focus{border-color:#f0d000!important;}
+    .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;display:inline-block;white-space:nowrap;-webkit-font-smoothing:antialiased;}
+    select,input[type="text"],input[type="number"]{outline:none;transition:border-color .2s;}
+    select:focus,input[type="text"]:focus,input[type="number"]:focus{border-color:#f0d000!important;}
     select option{background:#1c1b1b;color:#f5f4f0;}
-    .chart-type-btn{display:flex;align-items:center;justify-content:center;padding:8px;background:transparent;border:none;color:#777;cursor:pointer;border-radius:2px;transition:all .2s;}
-    .chart-type-btn.active{background:#353534;color:#f0d000;}
-    .chart-type-btn:hover:not(.active){color:#f5f4f0;background:rgba(255,255,255,.05);}
-    .series-row{display:flex;align-items:center;gap:8px;background:#131313;border:1px solid #262626;padding:8px 10px;margin-bottom:4px;}
-    .color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
-    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;text-align:center;border:1.5px dashed #262626;}
-    .toast{position:fixed;bottom:24px;right:24px;z-index:9998;padding:12px 20px;background:#201f1f;border:1px solid #262626;font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);}
+
+    /* ─ Chart type ─ */
+    .ct-btn{display:flex;align-items:center;justify-content:center;padding:8px;background:transparent;border:none;color:#777;cursor:pointer;transition:all .15s;}
+    .ct-btn.active{background:#353534;color:#f0d000;}
+    .ct-btn:hover:not(.active){color:#f5f4f0;background:rgba(255,255,255,.05);}
+
+    /* ─ Series rows ─ */
+    .series-row{display:flex;align-items:center;gap:8px;background:#0e0e0e;border:1px solid #262626;padding:7px 10px;margin-bottom:4px;}
+    .color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+    /* ─ Filter rows ─ */
+    .filter-row{display:grid;grid-template-columns:1fr 72px 1fr 22px;gap:4px;align-items:center;margin-bottom:4px;}
+    .fsel,.finp{background:#0e0e0e;border:1px solid #262626;color:#f5f4f0;font-family:'DM Mono',monospace;font-size:10px;padding:5px 7px;width:100%;}
+    .fsel:focus,.finp:focus{border-color:#f0d000;}
+    .fdel{background:none;border:none;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:2px;transition:color .15s;}
+    .fdel:hover{color:#e57373;}
+
+    /* ─ Config panel (scrollable sidebar) ─ */
+    .cfg-lbl{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#777;margin-bottom:6px;display:block;}
+    .cfg-hr{height:1px;background:#262626;margin:2px 0;}
+    .cfg-panel{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#262626 transparent;padding:18px 14px;display:flex;flex-direction:column;gap:16px;border-left:1px solid #262626;}
+    .cfg-panel::-webkit-scrollbar{width:3px;}
+    .cfg-panel::-webkit-scrollbar-thumb{background:#262626;}
+
+    /* ─ Chart area ─ */
+    .chart-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;min-height:300px;}
+
+    /* ─ Data table ─ */
+    .dt-wrap{overflow:auto;max-height:260px;border:1px solid #262626;}
+    .dt-wrap table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px;}
+    .dt-wrap th{background:#1a1a1a;color:#777;padding:7px 11px;text-transform:uppercase;letter-spacing:.06em;font-size:9px;border-bottom:1px solid #262626;white-space:nowrap;position:sticky;top:0;}
+    .dt-wrap td{padding:7px 11px;border-bottom:1px solid #1a1a1a;color:#ddd;white-space:nowrap;}
+    .dt-wrap tr:last-child td{border-bottom:none;}
+    .dt-wrap tr:hover td{background:rgba(240,208,0,.025);}
+
+    /* ─ Modal ─ */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+    .modal-bg.open{display:flex;}
+    .hist-item{padding:13px 18px;border-bottom:1px solid #262626;cursor:pointer;transition:background .12s;}
+    .hist-item:hover{background:rgba(240,208,0,.04);}
+    .hist-item:last-child{border-bottom:none;}
+
+    /* ─ Toast ─ */
+    .toast{position:fixed;bottom:24px;right:24px;z-index:9998;padding:11px 18px;background:#1a1a1a;border:1px solid #262626;font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);}
     .toast.visible{transform:translateY(0);opacity:1;}
     .toast.success{border-color:rgba(76,175,80,.4);color:#4caf50;}
     .toast.error{border-color:rgba(229,115,115,.4);color:#e57373;}
-    /* data table */
-    .dt-wrap{overflow:auto;max-height:300px;border:1px solid #262626;}
-    .dt-wrap table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px;}
-    .dt-wrap th{background:#1a1a1a;color:#777;padding:8px 12px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #262626;white-space:nowrap;position:sticky;top:0;}
-    .dt-wrap td{padding:8px 12px;border-bottom:1px solid #1a1a1a;color:#ddd;white-space:nowrap;}
-    .dt-wrap tr:last-child td{border-bottom:none;}
-    .dt-wrap tr:hover td{background:rgba(240,208,0,.03);}
-    /* select from history modal */
-    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
-    .modal-backdrop.open{display:flex;}
-    .hist-item{padding:14px 18px;border-bottom:1px solid #262626;cursor:pointer;transition:background .15s;}
-    .hist-item:hover{background:rgba(240,208,0,.04);}
-    .hist-item:last-child{border-bottom:none;}
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-  <!-- NAV -->
-  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
-    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
-      <a href="main.html" class="flex items-baseline gap-2">
-        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
-        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
-      </a>
-      <div class="hidden md:flex items-center gap-gap-lg">
-        <a href="main.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
-        <a href="dashboard.html" class="text-primary-container font-label-md text-label-md border-b border-primary-container px-3 py-1">Dashboard</a>
-        <a href="history.html"   class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
-        <a href="account-settings.html" class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
-      </div>
-      <div class="flex items-center gap-3">
-        <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[160px]"></span>
-        <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1">
-          <span class="material-symbols-outlined" style="font-size:14px">logout</span>
-        </button>
-      </div>
+<!-- NAV -->
+<nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+  <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+    <a href="main.html" class="flex items-baseline gap-2">
+      <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+      <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+    </a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="main.html"              class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+      <a href="dashboard.html"         class="text-primary-container font-label-md text-label-md border-b border-primary-container px-3 py-1">Dashboard</a>
+      <a href="history.html"           class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
+      <a href="account-settings.html"  class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
     </div>
-  </nav>
+    <div class="flex items-center gap-3">
+      <span id="nav-email" class="font-label-md text-label-md text-text-secondary hidden md:inline truncate max-w-[150px]"></span>
+      <button onclick="logout()" class="font-label-md text-label-md text-text-secondary hover:text-status-error border border-border-base px-3 py-1.5 transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined" style="font-size:14px">logout</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
-  <!-- MAIN -->
-  <main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-14 flex flex-col gap-10">
-    <!-- Header -->
+<!-- MAIN -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 flex flex-col gap-8">
+
+  <!-- Header row -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
     <div>
-      <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-3 flex items-center gap-2">
+      <p class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest mb-2 flex items-center gap-2">
         <span class="w-4 h-px bg-primary-container inline-block"></span>Data Explorer
       </p>
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary">Dashboard</h1>
+    </div>
+    <div class="flex gap-3 flex-shrink-0">
+      <button onclick="openHistoryModal()"
+        class="font-ui-header text-ui-header border border-border-base text-text-primary px-4 py-2.5 hover:border-primary-container hover:text-primary-container transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:15px">folder_open</span>Load Dataset
+      </button>
+      <button onclick="saveDashboard()" id="save-btn" disabled
+        class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-4 py-2.5 hover:bg-accent-hover transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed">
+        <span class="material-symbols-outlined" style="font-size:15px">save</span>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Dataset bar -->
+  <div id="dataset-bar" class="hidden border border-border-base bg-surface-container-low px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary-container" style="font-size:15px">table_chart</span>
+      <span id="dataset-name" class="font-ui-header text-ui-header text-text-primary" style="font-size:13px">—</span>
+      <span id="dataset-meta" class="font-label-md text-label-md text-text-secondary">—</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="filter-count-badge" class="hidden font-micro-tag text-micro-tag text-primary-container border border-primary-container/30 px-2 py-0.5"></span>
+      <span class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest border border-primary-container/30 px-2 py-1">Loaded</span>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="flex flex-col items-center justify-center py-20 border border-dashed border-border-base text-center gap-4">
+    <span class="material-symbols-outlined text-border-base" style="font-size:44px;font-variation-settings:'FILL' 0">bar_chart</span>
+    <div>
+      <p class="font-ui-header text-ui-header text-text-primary mb-1">No dataset loaded</p>
+      <p class="font-body-md text-body-md text-text-secondary max-w-xs">Complete a cleaning session first, then load it here to visualize.</p>
+    </div>
+    <div class="flex gap-3 mt-2">
+      <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors no-underline flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:15px">cleaning_services</span>Clean a Dataset
+      </a>
+      <button onclick="openHistoryModal()" class="font-ui-header text-ui-header border border-border-base text-text-primary px-5 py-2.5 hover:border-primary-container transition-all">
+        Load from History
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div id="workspace" class="hidden flex-col gap-6">
+
+    <!-- Chart + Config panel side by side -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_290px] gap-gutter bg-border-base" style="min-height:500px">
+
+      <!-- Chart panel -->
+      <div class="bg-surface flex flex-col">
+        <div class="flex items-center justify-between border-b border-border-base px-5 py-3">
+          <span id="chart-title" class="font-ui-header text-ui-header text-text-primary" style="font-size:13px">Chart Preview</span>
+          <span id="chart-row-count" class="font-micro-tag text-micro-tag text-text-secondary"></span>
+        </div>
+        <div class="chart-area">
+          <div id="chart-placeholder" class="text-center">
+            <span class="material-symbols-outlined text-border-base mb-3" style="font-size:48px">insert_chart</span>
+            <p class="font-body-md text-body-md text-text-secondary">Configure axes in the panel →</p>
+          </div>
+          <canvas id="main-chart" style="display:none;max-height:380px;max-width:100%"></canvas>
+        </div>
+      </div>
+
+      <!-- Config panel -->
+      <div class="cfg-panel bg-surface">
+
+        <!-- Chart type -->
         <div>
-          <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">Dashboard</h1>
-          <p class="font-body-md text-body-md text-text-secondary max-w-xl">Explore and visualize your cleaned dataset. Select a session from your cleaning history to begin.</p>
+          <span class="cfg-lbl">Chart Type</span>
+          <div class="grid grid-cols-5 gap-0.5 p-1 bg-background border border-border-base">
+            <button class="ct-btn active" data-ct="bar"      onclick="setChartType('bar')"      title="Bar"><span class="material-symbols-outlined" style="font-size:17px">bar_chart</span></button>
+            <button class="ct-btn"        data-ct="line"     onclick="setChartType('line')"     title="Line"><span class="material-symbols-outlined" style="font-size:17px">show_chart</span></button>
+            <button class="ct-btn"        data-ct="scatter"  onclick="setChartType('scatter')"  title="Scatter"><span class="material-symbols-outlined" style="font-size:17px">scatter_plot</span></button>
+            <button class="ct-btn"        data-ct="pie"      onclick="setChartType('pie')"      title="Pie"><span class="material-symbols-outlined" style="font-size:17px">pie_chart</span></button>
+            <button class="ct-btn"        data-ct="doughnut" onclick="setChartType('doughnut')" title="Donut"><span class="material-symbols-outlined" style="font-size:17px">donut_large</span></button>
+          </div>
         </div>
-        <div class="flex gap-3 flex-shrink-0">
-          <button onclick="openHistoryModal()" class="font-ui-header text-ui-header border border-border-base text-text-primary px-5 py-2.5 hover:border-primary-container hover:text-primary-container transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined" style="font-size:16px">folder_open</span>Load Dataset
-          </button>
-          <button onclick="saveDashboard()" id="save-btn" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
-            <span class="material-symbols-outlined" style="font-size:16px">save</span>Save
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Dataset info bar -->
-    <div id="dataset-bar" class="hidden border border-border-base bg-surface-container-low px-5 py-3 flex items-center justify-between flex-wrap gap-3">
-      <div class="flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary-container" style="font-size:16px">table_chart</span>
+        <div class="cfg-hr"></div>
+
+        <!-- X axis -->
         <div>
-          <span id="dataset-name" class="font-ui-header text-ui-header text-text-primary text-[13px]">—</span>
-          <span id="dataset-meta" class="font-label-md text-label-md text-text-secondary ml-3">—</span>
-        </div>
-      </div>
-      <span class="font-micro-tag text-micro-tag text-primary-container uppercase tracking-widest border border-primary-container/30 px-2 py-1">Dataset Loaded</span>
-    </div>
-
-    <!-- Empty state / workspace -->
-    <div id="empty-state" class="empty-state">
-      <span class="material-symbols-outlined text-text-secondary mb-4" style="font-size:40px;font-variation-settings:'FILL' 0">bar_chart</span>
-      <p class="font-ui-header text-ui-header text-text-primary mb-2">No dataset loaded</p>
-      <p class="font-body-md text-body-md text-text-secondary max-w-xs">Complete a data cleaning session first, then load it here to visualize and explore your data.</p>
-      <div class="flex gap-3 mt-6">
-        <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 hover:bg-accent-hover transition-colors no-underline flex items-center gap-2">
-          <span class="material-symbols-outlined" style="font-size:16px">cleaning_services</span>Clean a Dataset
-        </a>
-        <button onclick="openHistoryModal()" class="font-ui-header text-ui-header border border-border-base text-text-primary px-5 py-2.5 hover:border-primary-container transition-all flex items-center gap-2">
-          Load from History
-        </button>
-      </div>
-    </div>
-
-    <!-- Workspace (hidden until dataset loaded) -->
-    <div id="workspace" class="hidden flex flex-col gap-8">
-      <!-- Chart + Controls -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter bg-border-base p-gutter">
-        <!-- Chart canvas (8 cols) -->
-        <div class="col-span-1 md:col-span-8 bg-surface flex flex-col" style="min-height:400px">
-          <div class="flex items-center justify-between border-b border-border-base px-5 py-3">
-            <span id="chart-title" class="font-ui-header text-ui-header text-text-primary text-[13px]">Chart Preview</span>
-            <div class="flex items-center gap-2">
-              <span class="font-micro-tag text-micro-tag text-text-secondary uppercase tracking-widest">Chart.js</span>
-            </div>
-          </div>
-          <div class="flex-grow flex items-center justify-center p-6 relative">
-            <div id="chart-placeholder" class="text-center">
-              <span class="material-symbols-outlined text-border-base mb-3" style="font-size:48px">insert_chart</span>
-              <p class="font-body-md text-body-md text-text-secondary">Configure axes in the panel →</p>
-            </div>
-            <canvas id="main-chart" style="display:none;max-height:360px"></canvas>
-          </div>
+          <span class="cfg-lbl">X-Axis / Labels</span>
+          <select id="x-axis" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+            <option value="">— select column —</option>
+          </select>
         </div>
 
-        <!-- Config panel (4 cols) -->
-        <aside class="col-span-1 md:col-span-4 bg-surface p-gap-lg flex flex-col gap-5">
-          <div class="flex items-center gap-2 border-b border-border-base pb-4">
-            <span class="material-symbols-outlined text-primary-container" style="font-size:16px;font-variation-settings:'FILL' 0">tune</span>
-            <h2 class="font-ui-header text-ui-header text-text-primary">Chart Config</h2>
+        <!-- Y axis (multi-series) -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <span class="cfg-lbl" style="margin-bottom:0">Y-Axis / Values</span>
+            <button onclick="addSeries()" class="font-label-sm text-label-sm text-primary-container flex items-center gap-0.5 hover:text-accent-hover transition-colors">
+              <span class="material-symbols-outlined" style="font-size:13px">add</span>Add
+            </button>
           </div>
+          <div id="series-list"></div>
+        </div>
 
-          <!-- Chart type -->
-          <div class="flex flex-col gap-2">
-            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Chart Type</label>
-            <div class="grid grid-cols-5 gap-1 p-1 bg-background border border-border-base">
-              <button class="chart-type-btn active" data-type="bar" onclick="setChartType('bar')" title="Bar"><span class="material-symbols-outlined" style="font-size:18px">bar_chart</span></button>
-              <button class="chart-type-btn" data-type="line" onclick="setChartType('line')" title="Line"><span class="material-symbols-outlined" style="font-size:18px">show_chart</span></button>
-              <button class="chart-type-btn" data-type="scatter" onclick="setChartType('scatter')" title="Scatter"><span class="material-symbols-outlined" style="font-size:18px">scatter_plot</span></button>
-              <button class="chart-type-btn" data-type="pie" onclick="setChartType('pie')" title="Pie"><span class="material-symbols-outlined" style="font-size:18px">pie_chart</span></button>
-              <button class="chart-type-btn" data-type="doughnut" onclick="setChartType('doughnut')" title="Donut"><span class="material-symbols-outlined" style="font-size:18px">donut_large</span></button>
-            </div>
-          </div>
+        <!-- Aggregation -->
+        <div>
+          <span class="cfg-lbl">Aggregation</span>
+          <select id="agg-fn" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+            <option value="none">None (raw values)</option>
+            <option value="sum">Sum</option>
+            <option value="avg">Average</option>
+            <option value="count">Count</option>
+            <option value="max">Max</option>
+            <option value="min">Min</option>
+          </select>
+        </div>
 
-          <!-- X Axis -->
-          <div class="flex flex-col gap-2">
-            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">X-Axis / Labels</label>
-            <select id="x-axis" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
-              <option value="">— select column —</option>
+        <div class="cfg-hr"></div>
+
+        <!-- Sort -->
+        <div>
+          <span class="cfg-lbl">Sort</span>
+          <div class="flex gap-1">
+            <select id="sort-col" onchange="renderChart()" class="flex-1 bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+              <option value="">— column —</option>
+            </select>
+            <select id="sort-dir" onchange="renderChart()" class="bg-background border border-border-base text-text-primary font-body-md text-body-md p-2" style="width:75px">
+              <option value="none">—</option>
+              <option value="asc">ASC ↑</option>
+              <option value="desc">DESC ↓</option>
             </select>
           </div>
+        </div>
 
-          <!-- Y Axis (multi-series) -->
-          <div class="flex flex-col gap-2">
-            <div class="flex justify-between items-center">
-              <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Y-Axis / Values</label>
-              <button onclick="addSeries()" class="font-label-sm text-label-sm text-primary-container flex items-center gap-1 hover:text-accent-hover transition-colors">
-                <span class="material-symbols-outlined" style="font-size:14px">add</span> Add
-              </button>
-            </div>
-            <div id="series-list"></div>
-          </div>
-
-          <!-- Aggregation -->
-          <div class="flex flex-col gap-2">
-            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Aggregation</label>
-            <select id="agg-fn" onchange="renderChart()" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
-              <option value="none">None (raw values)</option>
-              <option value="sum">Sum</option>
-              <option value="avg">Average</option>
-              <option value="count">Count</option>
-              <option value="max">Max</option>
-              <option value="min">Min</option>
+        <!-- Top N / Bottom N -->
+        <div>
+          <span class="cfg-lbl">Rank Limit</span>
+          <div class="flex gap-1 items-center">
+            <select id="rank-mode" onchange="toggleRankN();renderChart()" class="flex-1 bg-background border border-border-base text-text-primary font-body-md text-body-md p-2">
+              <option value="none">All rows</option>
+              <option value="top">Top N</option>
+              <option value="bottom">Bottom N</option>
             </select>
+            <input id="rank-n" type="number" value="5" min="1" max="999" oninput="renderChart()"
+              class="bg-background border border-border-base text-text-primary font-body-md text-body-md p-2" style="width:58px;display:none" />
           </div>
+        </div>
 
-          <!-- Display -->
-          <div class="flex flex-col gap-3">
-            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Options</label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input id="show-legend" type="checkbox" checked class="w-4 h-4 bg-background border-border-base text-primary-container" onchange="renderChart()" />
-              <span class="font-body-md text-body-md text-text-primary">Show Legend</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input id="show-grid" type="checkbox" checked class="w-4 h-4 bg-background border-border-base text-primary-container" onchange="renderChart()" />
-              <span class="font-body-md text-body-md text-text-primary">Show Gridlines</span>
-            </label>
-          </div>
+        <div class="cfg-hr"></div>
 
-          <!-- Dashboard title -->
-          <div class="flex flex-col gap-2 mt-auto border-t border-border-base pt-4">
-            <label class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Dashboard Title</label>
-            <input id="dashboard-title" type="text" placeholder="e.g. Q1 Revenue Analysis" class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2" />
+        <!-- Filters -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <span class="cfg-lbl" style="margin-bottom:0">Filters</span>
+            <button onclick="addFilter()" class="font-label-sm text-label-sm text-primary-container flex items-center gap-0.5 hover:text-accent-hover transition-colors">
+              <span class="material-symbols-outlined" style="font-size:13px">add</span>Add
+            </button>
           </div>
-        </aside>
+          <div id="filter-list">
+            <p id="no-filter-msg" class="font-micro-tag text-micro-tag text-text-secondary" style="letter-spacing:.05em">No filters applied</p>
+          </div>
+        </div>
+
+        <div class="cfg-hr"></div>
+
+        <!-- Display -->
+        <div class="flex flex-col gap-2">
+          <span class="cfg-lbl">Display</span>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="show-legend" type="checkbox" checked onchange="renderChart()" class="w-3.5 h-3.5 accent-[#f0d000]" />
+            <span class="font-body-md text-body-md text-text-primary">Legend</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="show-grid" type="checkbox" checked onchange="renderChart()" class="w-3.5 h-3.5 accent-[#f0d000]" />
+            <span class="font-body-md text-body-md text-text-primary">Gridlines</span>
+          </label>
+        </div>
+
+        <div class="cfg-hr"></div>
+
+        <!-- Dashboard title -->
+        <div>
+          <span class="cfg-lbl">Dashboard Title</span>
+          <input id="dashboard-title" type="text" placeholder="e.g. Q1 Revenue Analysis"
+            class="w-full bg-background border border-border-base text-text-primary font-body-md text-body-md p-2" />
+        </div>
+
+      </div><!-- /cfg-panel -->
+    </div><!-- /grid -->
+
+    <!-- Data table section -->
+    <div>
+      <div class="flex items-center gap-4 mb-3">
+        <span style="font-family:'DM Mono';font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#f0d000;display:flex;align-items:center;gap:10px">
+          <span style="width:14px;height:1px;background:#f0d000;display:inline-block"></span>Filtered Data
+        </span>
+        <span id="row-count-label" class="font-label-md text-label-md text-text-secondary"></span>
       </div>
+      <div class="dt-wrap">
+        <table><thead id="dt-head"></thead><tbody id="dt-body"></tbody></table>
+      </div>
+    </div>
 
-      <!-- Data table -->
+  </div><!-- /workspace -->
+</main>
+
+<!-- History modal -->
+<div id="hist-modal" class="modal-bg">
+  <div class="w-full max-w-[540px] bg-surface-container-lowest border border-border-base mx-4 flex flex-col" style="max-height:80vh">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border-base">
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#f0d000;display:flex;align-items:center;gap:12px;">
-            <span style="width:16px;height:1px;background:#f0d000;display:inline-block"></span>Raw Data Preview
+        <h3 class="font-headline-sm text-headline-sm text-text-primary" style="font-size:17px">Select Cleaning Session</h3>
+        <p class="font-body-md text-body-md text-text-secondary">Load a cleaned dataset. Sessions with <span class="text-primary-container">Saved</span> badge will restore your dashboard config.</p>
+      </div>
+      <button onclick="closeHistoryModal()" class="text-text-secondary hover:text-text-primary ml-4">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="hist-list" class="overflow-y-auto flex-grow"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast">
+  <span class="material-symbols-outlined" id="toast-icon" style="font-size:15px">check_circle</span>
+  <span id="toast-text"></span>
+</div>
+
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+  <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto">
+    <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+    <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. DATA REFINEMENT PLATFORM.</span>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const API         = 'https://dafine-production.up.railway.app';
+const COLORS      = ['#f0d000','#55d6f4','#ff9800','#4caf50','#e040fb','#ff5252','#00bcd4','#8bc34a'];
+const STORAGE_KEY = 'dafine_dashboards';
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentHistoryId = null;
+let tableData   = [];      // full parsed CSV rows
+let columns     = [];      // column names
+let chartType   = 'bar';
+let chartInst   = null;
+let seriesCols  = [];      // [{col, color}] — may have null gaps from removals
+let filters     = [];      // [{col, op, val}] — may have null gaps
+let filterCount = 0;       // for generating unique IDs
+
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
+const getToken  = () => localStorage.getItem('dafine_token');
+const authHdr   = () => ({ Authorization: `Bearer ${getToken()}` });
+function logout()       { localStorage.clear(); window.location.href = 'login.html'; }
+function requireAuth()  { if (!getToken()) window.location.href = 'login.html'; }
+function esc(s)         { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+(async function init() {
+  requireAuth();
+  const email = localStorage.getItem('dafine_email');
+  if (email) document.getElementById('nav-email').textContent = email;
+
+  // Load from URL param (comes from history.html "Open" button)
+  const params = new URLSearchParams(window.location.search);
+  const histId = params.get('history_id');
+  if (histId) await loadDataset(parseInt(histId));
+})();
+
+// ═══════════════════════════════════════════════════════
+// HISTORY MODAL
+// ═══════════════════════════════════════════════════════
+async function openHistoryModal() {
+  document.getElementById('hist-modal').classList.add('open');
+  const el = document.getElementById('hist-list');
+  el.innerHTML = '<div class="px-6 py-10 text-center font-body-md text-body-md text-text-secondary">Loading...</div>';
+  try {
+    const r  = await fetch(`${API}/history`, { headers: authHdr() });
+    if (r.status === 401) { logout(); return; }
+    const d  = await r.json();
+    const list = d.history || [];
+    if (!list.length) {
+      el.innerHTML = `<div class="flex flex-col items-center py-12 gap-4 px-6 text-center">
+        <p class="font-body-md text-body-md text-text-secondary">No cleaning sessions yet.</p>
+        <a href="main.html" class="font-ui-header text-ui-header bg-primary-container text-on-primary-container px-5 py-2.5 no-underline">Clean a Dataset</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(h => {
+      const hasSaved = getSavedConfig(h.id) !== null;
+      return `<div class="hist-item" onclick="loadDataset(${h.id});closeHistoryModal()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+          <span style="font-family:'Syne';font-size:13px;font-weight:700;color:#f5f4f0">${esc(h.title||h.original_file_name)}</span>
+          <div style="display:flex;gap:5px;align-items:center">
+            ${hasSaved ? '<span style="font-family:\'DM Mono\';font-size:9px;color:#f0d000;background:rgba(240,208,0,.1);border:1px solid rgba(240,208,0,.25);padding:1px 7px;text-transform:uppercase;letter-spacing:.06em">Saved ↩</span>' : ''}
+            <span style="font-family:\'DM Mono\';font-size:9px;color:#777;background:#1a1a1a;border:1px solid #262626;padding:1px 7px;text-transform:uppercase">${esc((h.original_file_type||'').toUpperCase())}</span>
           </div>
-          <span id="row-count" class="font-label-md text-label-md text-text-secondary"></span>
         </div>
-        <div class="dt-wrap" id="data-table-wrap">
-          <table id="data-table"><thead id="dt-head"></thead><tbody id="dt-body"></tbody></table>
-        </div>
-      </div>
-    </div>
-  </main>
+        <div style="font-family:\'DM Mono\';font-size:10px;color:#777">${esc(h.original_file_name)} · ${new Date(h.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+      </div>`;
+    }).join('');
+  } catch {
+    el.innerHTML = '<div class="px-6 py-10 text-center font-body-md text-body-md text-status-error">Could not load history.</div>';
+  }
+}
+function closeHistoryModal() { document.getElementById('hist-modal').classList.remove('open'); }
+document.getElementById('hist-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('hist-modal')) closeHistoryModal();
+});
 
-  <!-- History picker modal -->
-  <div id="hist-modal" class="modal-backdrop">
-    <div class="w-full max-w-[560px] bg-surface-container-lowest border border-border-base mx-4 flex flex-col" style="max-height:80vh">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-border-base">
-        <div>
-          <h3 class="font-headline-sm text-headline-sm text-text-primary" style="font-size:18px">Select Cleaning Session</h3>
-          <p class="font-body-md text-body-md text-text-secondary">Choose a dataset to load into the dashboard.</p>
-        </div>
-        <button onclick="closeHistoryModal()" class="text-text-secondary hover:text-text-primary transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <div id="hist-list" class="overflow-y-auto flex-grow">
-        <div class="flex items-center justify-center py-12">
-          <span class="font-body-md text-body-md text-text-secondary">Loading...</span>
-        </div>
-      </div>
-    </div>
-  </div>
+// ═══════════════════════════════════════════════════════
+// LOAD DATASET
+// ═══════════════════════════════════════════════════════
+async function loadDataset(histId) {
+  currentHistoryId = histId;
+  showToast('Fetching dataset…');
+  try {
+    // Fetch history meta for name/counts
+    const hr = await fetch(`${API}/history`, { headers: authHdr() });
+    const hd = await hr.json();
+    const entry = (hd.history||[]).find(h => h.id === histId);
 
-  <!-- Toast -->
-  <div id="toast" class="toast">
-    <span class="material-symbols-outlined" id="toast-icon" style="font-size:16px">check_circle</span>
-    <span id="toast-text"></span>
-  </div>
+    // Download CSV
+    const r = await fetch(`${API}/history/${histId}/download`, { headers: authHdr() });
+    if (!r.ok) { showToast('Failed to load dataset.','error'); return; }
+    parseCSV(await r.text());
 
-  <!-- Footer -->
-  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
-      <div class="flex flex-col items-center md:items-start gap-1">
-        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
-        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
-      </div>
-      <div class="flex flex-wrap justify-center gap-6">
-        <a href="history.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">History</a>
-        <a href="main.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Clean</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    const API = 'https://dafine-production.up.railway.app';
-    const SERIES_COLORS = ['#f0d000','#55d6f4','#ff9800','#4caf50','#e040fb','#ff5252','#00bcd4','#8bc34a'];
-
-    let currentHistoryId = null, tableData = [], columns = [], chartType = 'bar', chartInst = null;
-    let seriesCols = [];
-
-    function authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('dafine_token')}` }; }
-    function logout()       { localStorage.clear(); window.location.href = 'login.html'; }
-    function requireAuth()  { if (!localStorage.getItem('dafine_token')) window.location.href = 'login.html'; }
-
-    (function init() {
-      requireAuth();
-      const email = localStorage.getItem('dafine_email');
-      if (email) document.getElementById('nav-email').textContent = email;
-      // If navigated from main.html with a history_id in URL
-      const params = new URLSearchParams(window.location.search);
-      const histId = params.get('history_id');
-      if (histId) loadDataset(parseInt(histId));
-    })();
-
-    // ── History modal ──
-    async function openHistoryModal() {
-      document.getElementById('hist-modal').classList.add('open');
-      try {
-        const r = await fetch(`${API}/history`, { headers: authHeaders() });
-        if (r.status === 401) { logout(); return; }
-        const d = await r.json();
-        const hist = d.history || [];
-        if (!hist.length) {
-          document.getElementById('hist-list').innerHTML = `<div class="flex flex-col items-center justify-center py-12 gap-4"><span style="font-family:'DM Mono';font-size:12px;color:#777">No cleaning sessions yet.</span><a href="main.html" style="font-family:'Syne';font-size:13px;font-weight:700;background:#f0d000;color:#0f0f0f;padding:10px 20px;text-decoration:none">Clean a Dataset</a></div>`;
-          return;
-        }
-        document.getElementById('hist-list').innerHTML = hist.map(h => `
-          <div class="hist-item" onclick="loadDataset(${h.id});closeHistoryModal()">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <span style="font-family:'Syne';font-size:14px;font-weight:700;color:#f5f4f0">${esc(h.title||h.original_file_name)}</span>
-              <span style="font-family:'DM Mono';font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.1em;background:#242424;border:1px solid #2e2e2e;padding:2px 7px">${esc(h.original_file_type?.toUpperCase()||'')}</span>
-            </div>
-            <div style="font-family:'DM Mono';font-size:10px;color:#777">${esc(h.original_file_name)} · ${new Date(h.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-          </div>`).join('');
-      } catch { showToast('Could not load history.','error'); }
-    }
-    function closeHistoryModal() { document.getElementById('hist-modal').classList.remove('open'); }
-
-    // ── Load dataset from history ──
-    async function loadDataset(histId) {
-      currentHistoryId = histId;
-      showToast('Fetching dataset…','success');
-      try {
-        // Get history entry for meta
-        const hr = await fetch(`${API}/history`, { headers: authHeaders() });
-        const hd = await hr.json();
-        const entry = (hd.history||[]).find(h => h.id === histId);
-
-        // Download CSV bytes
-        const r = await fetch(`${API}/history/${histId}/download`, { headers: authHeaders() });
-        if (!r.ok) { showToast('Failed to load dataset.','error'); return; }
-        const csvText = await r.text();
-        parseCSV(csvText);
-
-        if (entry) {
-          document.getElementById('dataset-name').textContent  = entry.title || entry.original_file_name;
-          document.getElementById('dataset-meta').textContent  = `${tableData.length.toLocaleString()} rows · ${columns.length} cols`;
-        }
-
-        document.getElementById('empty-state').classList.add('hidden');
-        document.getElementById('workspace').classList.remove('hidden');
-        document.getElementById('dataset-bar').classList.remove('hidden');
-        document.getElementById('save-btn').disabled = false;
-        document.getElementById('save-btn').classList.remove('opacity-50','cursor-not-allowed');
-
-        populateAxisSelects();
-        renderDataTable();
-        showToast('Dataset loaded.','success');
-      } catch(e) { showToast('Error loading dataset: '+e.message,'error'); }
+    if (entry) {
+      document.getElementById('dataset-name').textContent = entry.title || entry.original_file_name;
+      document.getElementById('dataset-meta').textContent = `${tableData.length.toLocaleString()} rows · ${columns.length} cols`;
     }
 
-    function parseCSV(text) {
-      const lines = text.trim().split('\n');
-      if (!lines.length) return;
-      columns = lines[0].split(',').map(c => c.replace(/^"|"$/g,'').trim());
-      tableData = lines.slice(1).map(line => {
-        const vals = line.split(',');
-        const row = {};
-        columns.forEach((col,i) => { row[col] = vals[i]?.replace(/^"|"$/g,'').trim() || ''; });
-        return row;
+    // Show workspace
+    document.getElementById('empty-state').classList.add('hidden');
+    document.getElementById('workspace').style.display = 'flex';
+    document.getElementById('dataset-bar').classList.remove('hidden');
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = false;
+    saveBtn.classList.remove('opacity-50','cursor-not-allowed');
+
+    // Populate all dropdown options
+    populateSelects();
+
+    // Restore saved config or start fresh
+    const saved = getSavedConfig(histId);
+    if (saved) {
+      restoreConfig(saved);
+      document.getElementById('save-label').textContent = 'Update';
+      showToast('Dashboard restored — edit and update to save changes.','success');
+    } else {
+      addSeries(); // default: 1 empty Y-axis series
+      renderDataTable(tableData);
+      showToast('Dataset loaded.','success');
+    }
+
+  } catch(e) { showToast('Error: ' + e.message,'error'); }
+}
+
+// ─── CSV parser (handles quoted fields) ───────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (!lines.length) return;
+  function parseLine(line) {
+    const r=[]; let cur=''; let inQ=false;
+    for (const c of line) {
+      if (c==='"') inQ=!inQ;
+      else if (c===',' && !inQ) { r.push(cur.trim().replace(/^"|"$/g,'')); cur=''; }
+      else cur+=c;
+    }
+    r.push(cur.trim().replace(/^"|"$/g,''));
+    return r;
+  }
+  columns   = parseLine(lines[0]);
+  tableData = lines.slice(1).filter(l=>l.trim()).map(line => {
+    const vals = parseLine(line);
+    const row  = {};
+    columns.forEach((col,i) => { row[col] = vals[i]??''; });
+    return row;
+  });
+}
+
+// ─── Populate all dropdowns with column options ────────
+function populateSelects() {
+  const opts = () => '<option value="">— select —</option>' + columns.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  document.getElementById('x-axis').innerHTML   = opts();
+  document.getElementById('sort-col').innerHTML = '<option value="">— none —</option>' + columns.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  // Reset series, filters, rank
+  seriesCols  = []; filters = []; filterCount = 0;
+  document.getElementById('series-list').innerHTML = '';
+  document.getElementById('filter-list').innerHTML  = '<p id="no-filter-msg" class="font-micro-tag text-micro-tag text-text-secondary" style="letter-spacing:.05em">No filters applied</p>';
+  document.getElementById('rank-mode').value = 'none';
+  document.getElementById('rank-n').style.display = 'none';
+  document.getElementById('agg-fn').value    = 'none';
+  document.getElementById('sort-dir').value  = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE / RESTORE
+// ═══════════════════════════════════════════════════════
+function getSavedConfig(histId) {
+  const all = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+  return all.find(d => d.historyId === histId) ?? null;
+}
+
+function saveDashboard() {
+  if (!currentHistoryId) { showToast('Load a dataset first.','error'); return; }
+  const title = document.getElementById('dashboard-title').value.trim() || `Dashboard #${currentHistoryId}`;
+  const cfg = {
+    historyId: currentHistoryId,
+    title,
+    chartType,
+    xCol:      document.getElementById('x-axis').value,
+    series:    seriesCols.filter(Boolean),
+    aggFn:     document.getElementById('agg-fn').value,
+    sortCol:   document.getElementById('sort-col').value,
+    sortDir:   document.getElementById('sort-dir').value,
+    rankMode:  document.getElementById('rank-mode').value,
+    rankN:     parseInt(document.getElementById('rank-n').value)||5,
+    filters:   filters.filter(f => f && f.col),
+    showLegend:document.getElementById('show-legend').checked,
+    showGrid:  document.getElementById('show-grid').checked,
+    savedAt:   new Date().toISOString(),
+  };
+  // Replace existing or prepend
+  const all = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]').filter(d => d.historyId !== currentHistoryId);
+  all.unshift(cfg);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0,30)));
+  document.getElementById('save-label').textContent = 'Update';
+  showToast(`"${title}" saved.`,'success');
+}
+
+function restoreConfig(cfg) {
+  // Chart type
+  setChartType(cfg.chartType||'bar', false);
+  // Title
+  if (cfg.title) document.getElementById('dashboard-title').value = cfg.title;
+  // Agg, sort, rank
+  document.getElementById('agg-fn').value   = cfg.aggFn   || 'none';
+  document.getElementById('sort-col').value = cfg.sortCol || '';
+  document.getElementById('sort-dir').value = cfg.sortDir || 'none';
+  document.getElementById('rank-mode').value= cfg.rankMode|| 'none';
+  document.getElementById('rank-n').value   = cfg.rankN   || 5;
+  toggleRankN();
+  // Display
+  if (cfg.showLegend !== undefined) document.getElementById('show-legend').checked = cfg.showLegend;
+  if (cfg.showGrid   !== undefined) document.getElementById('show-grid').checked   = cfg.showGrid;
+  // Filters
+  (cfg.filters||[]).forEach(f => { if (f && f.col) addFilter(f.col, f.op||'=', f.val||''); });
+  // Series
+  (cfg.series||[]).forEach(s => { if (s && s.col) addSeries(s.col, s.color); });
+  if (!cfg.series?.length) addSeries();
+  // X axis (after series so options are ready)
+  if (cfg.xCol) document.getElementById('x-axis').value = cfg.xCol;
+  renderChart();
+  renderDataTable(getFilteredData());
+}
+
+// ═══════════════════════════════════════════════════════
+// CHART TYPE
+// ═══════════════════════════════════════════════════════
+function setChartType(type, rerender=true) {
+  chartType = type;
+  document.querySelectorAll('.ct-btn').forEach(b => b.classList.toggle('active', b.dataset.ct===type));
+  if (rerender) renderChart();
+}
+
+function toggleRankN() {
+  document.getElementById('rank-n').style.display =
+    document.getElementById('rank-mode').value === 'none' ? 'none' : 'block';
+}
+
+// ═══════════════════════════════════════════════════════
+// SERIES
+// ═══════════════════════════════════════════════════════
+function addSeries(col='', color=null) {
+  const idx  = seriesCols.length;
+  const clr  = color || COLORS[idx % COLORS.length];
+  seriesCols.push({ col, color: clr });
+  const opts = columns.map(c => `<option value="${esc(c)}"${c===col?' selected':''}>${esc(c)}</option>`).join('');
+  const row  = document.createElement('div');
+  row.className = 'series-row'; row.dataset.idx = idx;
+  row.innerHTML = `
+    <div class="color-dot" style="background:${clr}"></div>
+    <select style="flex:1;background:transparent;border:none;color:#f5f4f0;font-family:'DM Mono',monospace;font-size:11px;"
+      onchange="seriesCols[${idx}].col=this.value;renderChart()">
+      <option value="">— column —</option>${opts}
+    </select>
+    <button onclick="removeSeries(${idx})" style="background:none;border:none;color:#555;cursor:pointer;display:flex;align-items:center;padding:2px;transition:color .15s" onmouseover="this.style.color='#e57373'" onmouseout="this.style.color='#555'">
+      <span class="material-symbols-outlined" style="font-size:15px">close</span>
+    </button>`;
+  document.getElementById('series-list').appendChild(row);
+}
+
+function removeSeries(idx) {
+  seriesCols[idx] = null;
+  document.querySelector(`[data-idx="${idx}"]`)?.remove();
+  renderChart();
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════════════════════
+function addFilter(col='', op='=', val='') {
+  document.getElementById('no-filter-msg')?.remove();
+  const fid  = filterCount++;
+  filters.push({ col, op, val });
+  const fidx = filters.length - 1;
+  const opts = columns.map(c => `<option value="${esc(c)}"${c===col?' selected':''}>${esc(c)}</option>`).join('');
+  const ops  = ['=','!=','>','<','>=','<=','contains'].map(o => `<option value="${o}"${o===op?' selected':''}>${o}</option>`).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'filter-row'; wrap.dataset.fidx = fid;
+  wrap.innerHTML = `
+    <select class="fsel" onchange="filters[${fidx}].col=this.value;renderChart()"><option value="">col</option>${opts}</select>
+    <select class="fsel" onchange="filters[${fidx}].op=this.value;renderChart()">${ops}</select>
+    <input  class="finp" type="text" placeholder="value" value="${esc(val)}" oninput="filters[${fidx}].val=this.value;renderChart()" />
+    <button onclick="removeFilter(this,${fidx})" style="background:none;border:none;color:#555;cursor:pointer;display:flex;align-items:center;padding:2px;transition:color .15s" onmouseover="this.style.color='#e57373'" onmouseout="this.style.color='#555'">
+      <span class="material-symbols-outlined" style="font-size:15px">close</span>
+    </button>`;
+  document.getElementById('filter-list').appendChild(wrap);
+}
+
+function removeFilter(btn, fidx) {
+  filters[fidx] = null;
+  btn.closest('.filter-row').remove();
+  if (!document.querySelector('#filter-list .filter-row')) {
+    document.getElementById('filter-list').innerHTML =
+      '<p id="no-filter-msg" class="font-micro-tag text-micro-tag text-text-secondary" style="letter-spacing:.05em">No filters applied</p>';
+  }
+  renderChart();
+}
+
+// ═══════════════════════════════════════════════════════
+// DATA PROCESSING PIPELINE
+// ═══════════════════════════════════════════════════════
+function getFilteredData() {
+  let data = [...tableData];
+  const activeFilters = filters.filter(f => f && f.col && f.val !== '');
+  for (const f of activeFilters) {
+    data = data.filter(row => {
+      const cell = String(row[f.col]??'');
+      const v    = f.val;
+      switch(f.op) {
+        case '=':        return cell === v;
+        case '!=':       return cell !== v;
+        case '>':        return parseFloat(cell) > parseFloat(v);
+        case '<':        return parseFloat(cell) < parseFloat(v);
+        case '>=':       return parseFloat(cell) >= parseFloat(v);
+        case '<=':       return parseFloat(cell) <= parseFloat(v);
+        case 'contains': return cell.toLowerCase().includes(v.toLowerCase());
+        default:         return true;
+      }
+    });
+  }
+  // Update filter badge
+  const badge = document.getElementById('filter-count-badge');
+  if (activeFilters.length > 0) {
+    badge.textContent = `${activeFilters.length} filter${activeFilters.length>1?'s':''} active · ${data.length.toLocaleString()} rows`;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+  return data;
+}
+
+function processForChart(data, xCol, yCols, aggFn) {
+  const sortCol  = document.getElementById('sort-col').value;
+  const sortDir  = document.getElementById('sort-dir').value;
+  const rankMode = document.getElementById('rank-mode').value;
+  const rankN    = Math.max(1, parseInt(document.getElementById('rank-n').value)||5);
+
+  let rows;
+
+  if (aggFn === 'none') {
+    // Raw values (cap at 500 to avoid browser freeze)
+    rows = data.slice(0, 500).map(row => {
+      const r = { __label: String(row[xCol]??'') };
+      yCols.forEach(y => { r[y] = parseFloat(row[y]); });
+      return r;
+    });
+  } else {
+    // Group by xCol → aggregate yCols
+    const grp = {};
+    data.forEach(row => {
+      const key = String(row[xCol]??'(blank)');
+      if (!grp[key]) { grp[key] = {}; yCols.forEach(y => grp[key][y] = []); }
+      yCols.forEach(y => { const v = parseFloat(row[y]); if (!isNaN(v)) grp[key][y].push(v); });
+    });
+    rows = Object.entries(grp).map(([key, vals]) => {
+      const r = { __label: key };
+      yCols.forEach(y => {
+        const v = vals[y]||[];
+        switch(aggFn) {
+          case 'sum':   r[y] = v.reduce((a,b)=>a+b,0); break;
+          case 'avg':   r[y] = v.length ? +(v.reduce((a,b)=>a+b,0)/v.length).toFixed(4) : 0; break;
+          case 'count': r[y] = v.length; break;
+          case 'max':   r[y] = v.length ? Math.max(...v) : 0; break;
+          case 'min':   r[y] = v.length ? Math.min(...v) : 0; break;
+        }
       });
-    }
+      return r;
+    });
+  }
 
-    function populateAxisSelects() {
-      const opts = columns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-      document.getElementById('x-axis').innerHTML = '<option value="">— select column —</option>' + opts;
-      seriesCols = [];
-      document.getElementById('series-list').innerHTML = '';
-      addSeries();
-    }
+  // Sort
+  if (sortCol && sortDir !== 'none') {
+    const sign = sortDir === 'asc' ? 1 : -1;
+    rows.sort((a,b) => {
+      const va = a[sortCol]??a.__label;
+      const vb = b[sortCol]??b.__label;
+      const na = parseFloat(va), nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb)) return sign*(na-nb);
+      return sign*String(va).localeCompare(String(vb));
+    });
+  }
 
-    function addSeries() {
-      const idx   = seriesCols.length;
-      const color = SERIES_COLORS[idx % SERIES_COLORS.length];
-      seriesCols.push({ col: '', color });
-      const opts  = columns.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-      const row   = document.createElement('div');
-      row.className = 'series-row'; row.dataset.idx = idx;
-      row.innerHTML = `
-        <div class="color-dot" style="background:${color}"></div>
-        <select style="flex:1;background:transparent;border:none;color:#f5f4f0;font-family:'DM Mono',monospace;font-size:11px;" onchange="seriesCols[${idx}].col=this.value;renderChart()">
-          <option value="">— select column —</option>${opts}
-        </select>
-        <button onclick="removeSeries(${idx})" style="background:none;border:none;color:#777;cursor:pointer;padding:2px" class="hover:text-status-error">
-          <span class="material-symbols-outlined" style="font-size:16px">close</span>
-        </button>`;
-      document.getElementById('series-list').appendChild(row);
-    }
+  // Top N / Bottom N (applied AFTER sort — preserves ranking)
+  if (rankMode === 'top')    rows = rows.slice(0, rankN);
+  if (rankMode === 'bottom') rows = rows.slice(-rankN);
 
-    function removeSeries(idx) {
-      seriesCols[idx] = null;
-      const row = document.querySelector(`[data-idx="${idx}"]`);
-      if (row) row.remove();
-      renderChart();
-    }
+  return rows;
+}
 
-    function setChartType(type) {
-      chartType = type;
-      document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector(`[data-type="${type}"]`).classList.add('active');
-      renderChart();
-    }
+// ═══════════════════════════════════════════════════════
+// RENDER CHART
+// ═══════════════════════════════════════════════════════
+function renderChart() {
+  const xCol   = document.getElementById('x-axis').value;
+  const aggFn  = document.getElementById('agg-fn').value;
+  const active = seriesCols.filter(s => s && s.col);
 
-    function renderChart() {
-      const xCol   = document.getElementById('x-axis').value;
-      const aggFn  = document.getElementById('agg-fn').value;
-      const active = seriesCols.filter(s => s && s.col);
-      if (!xCol || !active.length) {
-        document.getElementById('chart-placeholder').style.display = 'flex';
-        document.getElementById('main-chart').style.display = 'none';
-        return;
-      }
-      document.getElementById('chart-placeholder').style.display = 'none';
-      document.getElementById('main-chart').style.display = 'block';
+  if (!xCol || !active.length) {
+    document.getElementById('chart-placeholder').style.display = 'flex';
+    document.getElementById('main-chart').style.display        = 'none';
+    document.getElementById('chart-title').textContent         = 'Chart Preview';
+    document.getElementById('chart-row-count').textContent     = '';
+    return;
+  }
+  document.getElementById('chart-placeholder').style.display = 'none';
+  document.getElementById('main-chart').style.display        = 'block';
 
-      // Build labels
-      let labels, datasets;
-      if (aggFn !== 'none') {
-        // Group by x, aggregate y
-        const groups = {};
-        tableData.forEach(row => {
-          const key = row[xCol] || '(blank)';
-          if (!groups[key]) groups[key] = {};
-          active.forEach(s => {
-            if (!groups[key][s.col]) groups[key][s.col] = [];
-            const v = parseFloat(row[s.col]);
-            if (!isNaN(v)) groups[key][s.col].push(v);
-          });
-        });
-        labels = Object.keys(groups).slice(0, 50);
-        datasets = active.map(s => ({
-          label: s.col, borderColor: s.color, backgroundColor: s.color + '80',
-          data: labels.map(k => {
-            const vals = groups[k][s.col] || [];
-            if (!vals.length) return 0;
-            if (aggFn==='sum')   return vals.reduce((a,b)=>a+b,0);
-            if (aggFn==='avg')   return vals.reduce((a,b)=>a+b,0)/vals.length;
-            if (aggFn==='count') return vals.length;
-            if (aggFn==='max')   return Math.max(...vals);
-            if (aggFn==='min')   return Math.min(...vals);
-          }),
-        }));
-      } else {
-        labels = tableData.slice(0,100).map(r => r[xCol]||'');
-        datasets = active.map(s => ({
-          label: s.col, borderColor: s.color, backgroundColor: s.color + '80',
-          data: tableData.slice(0,100).map(r => { const v=parseFloat(r[s.col]); return isNaN(v)?null:v; }),
-        }));
-      }
+  const filtered  = getFilteredData();
+  const yCols     = active.map(s => s.col);
+  const processed = processForChart(filtered, xCol, yCols, aggFn);
+  const labels    = processed.map(r => r.__label);
 
-      // Pie/doughnut only uses first series
-      if (['pie','doughnut'].includes(chartType) && datasets.length > 0) {
-        datasets = [{
-          ...datasets[0],
-          backgroundColor: labels.map((_,i)=>SERIES_COLORS[i%SERIES_COLORS.length]),
-          borderColor: '#131313', borderWidth: 2,
-        }];
-      }
+  document.getElementById('chart-row-count').textContent = `${processed.length} pts`;
 
-      const showLegend = document.getElementById('show-legend').checked;
-      const showGrid   = document.getElementById('show-grid').checked;
-      const ctx        = document.getElementById('main-chart').getContext('2d');
-      if (chartInst) chartInst.destroy();
-      chartInst = new Chart(ctx, {
-        type: chartType,
-        data: { labels, datasets },
-        options: {
-          responsive: true, maintainAspectRatio: true,
-          plugins: {
-            legend: { display: showLegend, labels: { color: '#f5f4f0', font: { family: "'DM Mono',monospace", size: 11 } } },
-            tooltip: { backgroundColor: '#1a1a1a', titleColor: '#f5f4f0', bodyColor: '#777', borderColor: '#262626', borderWidth: 1 },
-          },
-          scales: ['pie','doughnut'].includes(chartType) ? {} : {
-            x: { grid: { display: showGrid, color: '#262626' }, ticks: { color: '#777', font: { family: "'DM Mono',monospace", size: 10 } } },
-            y: { grid: { display: showGrid, color: '#262626' }, ticks: { color: '#777', font: { family: "'DM Mono',monospace", size: 10 } } },
-          },
+  const showLegend = document.getElementById('show-legend').checked;
+  const showGrid   = document.getElementById('show-grid').checked;
+
+  let datasets = active.map(s => ({
+    label:           s.col,
+    data:            processed.map(r => isNaN(r[s.col]) ? null : r[s.col]),
+    borderColor:     s.color,
+    backgroundColor: s.color + '70',
+    borderWidth:     1.5,
+    tension:         0.3,
+    pointRadius:     chartType === 'scatter' ? 4 : 3,
+    fill:            false,
+  }));
+
+  // Pie / doughnut → single series, multi-color slices
+  if (['pie','doughnut'].includes(chartType) && datasets.length > 0) {
+    datasets = [{
+      ...datasets[0],
+      backgroundColor: labels.map((_,i) => COLORS[i%COLORS.length]),
+      borderColor:     '#131313',
+      borderWidth:     2,
+    }];
+  }
+
+  const ctx = document.getElementById('main-chart').getContext('2d');
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(ctx, {
+    type: chartType,
+    data: { labels, datasets },
+    options: {
+      responsive:        true,
+      maintainAspectRatio: true,
+      animation:         { duration: 180 },
+      plugins: {
+        legend: {
+          display: showLegend,
+          labels:  { color: '#f5f4f0', font: { family:"'DM Mono',monospace", size: 10 } },
         },
-      });
-      // Update chart title
-      const titleParts = active.map(s => s.col).join(', ');
-      document.getElementById('chart-title').textContent = `${titleParts} by ${xCol}`;
-    }
+        tooltip: {
+          backgroundColor: '#1a1a1a', titleColor: '#f5f4f0',
+          bodyColor: '#999', borderColor: '#262626', borderWidth: 1,
+        },
+      },
+      scales: ['pie','doughnut'].includes(chartType) ? {} : {
+        x: { grid: { display: showGrid, color: '#1e1e1e' }, ticks: { color: '#777', font: { family:"'DM Mono',monospace", size: 10 }, maxRotation: 45 } },
+        y: { grid: { display: showGrid, color: '#1e1e1e' }, ticks: { color: '#777', font: { family:"'DM Mono',monospace", size: 10 } } },
+      },
+    },
+  });
 
-    function renderDataTable() {
-      const rowLimit = 200;
-      document.getElementById('row-count').textContent = `Showing ${Math.min(rowLimit, tableData.length)} of ${tableData.length.toLocaleString()} rows`;
-      document.getElementById('dt-head').innerHTML = `<tr>${columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
-      document.getElementById('dt-body').innerHTML = tableData.slice(0,rowLimit).map(row =>
-        `<tr>${columns.map(c=>`<td>${esc(String(row[c]||''))}</td>`).join('')}</tr>`
-      ).join('');
-    }
+  // Update chart title
+  const aggSuffix = aggFn !== 'none' ? ` (${aggFn})` : '';
+  document.getElementById('chart-title').textContent = `${yCols.join(', ')}${aggSuffix} by ${xCol}`;
 
-    // ── Save dashboard ──
-    async function saveDashboard() {
-      if (!currentHistoryId) { showToast('Load a dataset first.','error'); return; }
-      const title = document.getElementById('dashboard-title').value.trim() || 'Untitled Dashboard';
-      // Backend doesn't have a dashboard endpoint yet — save config to localStorage as interim
-      const config = { historyId: currentHistoryId, title, chartType, xCol: document.getElementById('x-axis').value, series: seriesCols.filter(Boolean), aggFn: document.getElementById('agg-fn').value, savedAt: new Date().toISOString() };
-      const saved = JSON.parse(localStorage.getItem('dafine_dashboards')||'[]');
-      const idx   = saved.findIndex(d => d.historyId === currentHistoryId);
-      if (idx >= 0) saved[idx] = config; else saved.unshift(config);
-      localStorage.setItem('dafine_dashboards', JSON.stringify(saved.slice(0,20)));
-      showToast(`Dashboard "${title}" saved.`,'success');
-    }
+  // Sync data table to filtered data
+  renderDataTable(filtered);
+}
 
-    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// ═══════════════════════════════════════════════════════
+// DATA TABLE
+// ═══════════════════════════════════════════════════════
+function renderDataTable(data) {
+  const LIMIT = 200;
+  document.getElementById('row-count-label').textContent =
+    `Showing ${Math.min(LIMIT, data.length)} of ${data.length.toLocaleString()} rows`;
+  document.getElementById('dt-head').innerHTML =
+    `<tr>${columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
+  document.getElementById('dt-body').innerHTML =
+    data.slice(0, LIMIT).map(row =>
+      `<tr>${columns.map(c=>`<td>${esc(String(row[c]??''))}</td>`).join('')}</tr>`
+    ).join('');
+}
 
-    let toastTimer;
-    function showToast(msg, type='success') {
-      const t = document.getElementById('toast');
-      document.getElementById('toast-icon').textContent = type==='success'?'check_circle':'error';
-      document.getElementById('toast-text').textContent = msg;
-      t.className = `toast ${type} visible`;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=>t.classList.remove('visible'),3200);
-    }
-
-    // close modal on backdrop click
-    document.getElementById('hist-modal').addEventListener('click',e=>{if(e.target===document.getElementById('hist-modal'))closeHistoryModal();});
-  </script>
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let _tt;
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = type==='success' ? 'check_circle' : 'error';
+  document.getElementById('toast-text').textContent = msg;
+  t.className = `toast ${type} visible`;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('visible'), 3200);
+}
+</script>
 </body>
 </html>
