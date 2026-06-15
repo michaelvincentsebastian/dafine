@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Privacy Policy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-primary": "#f5f4f0", "primary-fixed-dim": "#e4c600",
+            "background": "#131313", "on-primary": "#393000",
+            "on-surface": "#e5e2e1", "surface-container": "#201f1f",
+            "surface-container-lowest": "#0e0e0e", "on-background": "#e5e2e1",
+            "status-error": "#e57373", "on-surface-variant": "#cfc6ab",
+            "primary-fixed": "#ffe250", "text-secondary": "#777777",
+            "surface": "#131313", "surface-bright": "#3a3939",
+            "on-primary-container": "#685900", "surface-variant": "#353534",
+            "primary-container": "#f0d000", "accent-hover": "#c9ae00",
+            "surface-container-highest": "#353534", "surface-container-low": "#1c1b1b",
+            "on-primary-fixed": "#211b00", "primary": "#ffeda4",
+            "border-base": "#262626", "border-muted": "#2e2e2e",
+            "secondary": "#c8c6c5", "surface-container-high": "#2a2a2a",
+            "surface-tertiary": "#242424",
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          spacing: { "gutter": "1px", "gap-sm": "8px", "container-max": "1100px", "gap-md": "16px", "gap-lg": "24px", "margin-desktop": "32px", "margin-mobile": "16px" },
+          fontFamily: { "label-sm": ["DM Mono"], "label-md": ["DM Mono"], "micro-tag": ["DM Mono"], "ui-header": ["Syne"], "headline-sm": ["Syne"], "headline-lg": ["Syne"], "headline-lg-mobile": ["Syne"], "body-md": ["DM Mono"] },
+          fontSize: {
+            "label-sm": ["10px", { lineHeight: "1.4", fontWeight: "500" }],
+            "label-md": ["11px", { lineHeight: "1.5", fontWeight: "400" }],
+            "micro-tag": ["9px", { lineHeight: "1.2", fontWeight: "500" }],
+            "ui-header": ["16px", { lineHeight: "1.4", fontWeight: "700" }],
+            "headline-sm": ["21px", { lineHeight: "1.2", fontWeight: "800" }],
+            "headline-lg": ["36px", { lineHeight: "1.1", fontWeight: "800" }],
+            "headline-lg-mobile": ["32px", { lineHeight: "1.1", fontWeight: "800" }],
+            "body-md": ["12px", { lineHeight: "1.8", fontWeight: "400" }],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #131313; color: #f5f4f0; min-height: 100vh; display: flex; flex-direction: column; }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.04; pointer-events: none; z-index: 9999;
+    }
+    .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; display: inline-block; white-space: nowrap; -webkit-font-smoothing: antialiased; }
+
+    /* ── Sidebar ── */
+    .sidebar { position: sticky; top: 80px; height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #262626 transparent; }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #262626; }
+    .sidebar-link { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; padding: 8px 14px; color: #777; cursor: pointer; border-left: 2px solid transparent; transition: all .18s; text-decoration: none; }
+    .sidebar-link:hover { color: #f5f4f0; border-left-color: #2e2e2e; }
+    .sidebar-link.active { color: #f0d000; border-left-color: #f0d000; }
+    .sidebar-group { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: #444; padding: 18px 14px 6px; }
+
+    /* ── Content ── */
+    .policy-section { padding-bottom: 56px; border-bottom: 1px solid #262626; margin-bottom: 56px; }
+    .policy-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .policy-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: #f0d000; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+    .policy-eyebrow::before { content: ''; width: 16px; height: 1px; background: #f0d000; }
+    .policy-h1 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 3.5vw, 38px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 14px; }
+    .policy-h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -.3px; margin-top: 32px; margin-bottom: 10px; color: #f5f4f0; }
+    .policy-p { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; color: #999; margin-bottom: 14px; }
+    .policy-p strong { color: #f5f4f0; font-weight: 500; }
+    .policy-p a { color: #f0d000; text-decoration: none; border-bottom: 1px solid rgba(240,208,0,.3); transition: border-color .15s; }
+    .policy-p a:hover { border-bottom-color: #f0d000; }
+    .policy-lead { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; color: #888; margin-bottom: 24px; }
+
+    /* ── List items ── */
+    .policy-list { list-style: none; padding: 0; margin: 0 0 16px; }
+    .policy-list li { font-family: 'DM Mono', monospace; font-size: 12px; color: #999; line-height: 1.9; padding: 6px 0 6px 20px; border-bottom: 1px solid #1a1a1a; position: relative; }
+    .policy-list li:last-child { border-bottom: none; }
+    .policy-list li::before { content: '→'; position: absolute; left: 0; color: #f0d000; font-size: 11px; }
+    .policy-list li strong { color: #f5f4f0; font-weight: 500; }
+
+    /* ── Note / highlight box ── */
+    .policy-note { background: rgba(240, 208, 0, .04); border: 1px solid rgba(240, 208, 0, .18); border-left: 3px solid #f0d000; padding: 14px 18px; margin: 18px 0 22px; }
+    .policy-note-lbl { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: #f0d000; margin-bottom: 7px; }
+    .policy-note p { font-family: 'DM Mono', monospace; font-size: 11px; color: #999; line-height: 1.75; margin: 0; }
+
+    /* ── Table of changes ── */
+    .policy-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 11px; margin: 14px 0 22px; }
+    .policy-table th { background: #1a1a1a; color: #777; padding: 9px 14px; text-transform: uppercase; font-size: 9px; letter-spacing: .1em; border-bottom: 1px solid #262626; text-align: left; }
+    .policy-table td { padding: 9px 14px; border-bottom: 1px solid #1e1e1e; color: #ccc; vertical-align: top; line-height: 1.6; }
+    .policy-table tr:last-child td { border-bottom: none; }
+
+    /* ── Version badge ── */
+    .version-badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; padding: 4px 10px; background: rgba(240,208,0,.08); border: 1px solid rgba(240,208,0,.25); color: #f0d000; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- NAV -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="main.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <a href="main.html"              class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+        <a href="dashboard.html"         class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Dashboard</a>
+        <a href="history.html"           class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
+        <a href="account-settings.html"  class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
+        <a href="documentation.html"     class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Docs</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop gap-0">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar w-52 flex-shrink-0 pr-4 pt-8">
+      <div class="sidebar-group">Sections</div>
+      <a href="#introduction"      class="sidebar-link active" onclick="setActive(this)">Introduction</a>
+      <a href="#who-we-are"        class="sidebar-link" onclick="setActive(this)">Who We Are</a>
+      <a href="#data-collected"    class="sidebar-link" onclick="setActive(this)">Data We Collect</a>
+      <a href="#data-not-collected"class="sidebar-link" onclick="setActive(this)">Data We Don't Collect</a>
+      <a href="#how-we-use"        class="sidebar-link" onclick="setActive(this)">How We Use Data</a>
+      <a href="#data-storage"      class="sidebar-link" onclick="setActive(this)">Data Storage</a>
+      <a href="#third-parties"     class="sidebar-link" onclick="setActive(this)">Third Parties</a>
+      <a href="#your-rights"       class="sidebar-link" onclick="setActive(this)">Your Rights</a>
+      <a href="#security"          class="sidebar-link" onclick="setActive(this)">Security</a>
+      <a href="#cookies"           class="sidebar-link" onclick="setActive(this)">Cookies &amp; Storage</a>
+      <a href="#children"          class="sidebar-link" onclick="setActive(this)">Children</a>
+      <a href="#open-source"       class="sidebar-link" onclick="setActive(this)">Open Source Notice</a>
+      <a href="#changes"           class="sidebar-link" onclick="setActive(this)">Changes</a>
+      <a href="#contact"           class="sidebar-link" onclick="setActive(this)">Contact</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow min-w-0 py-12 pl-0 md:pl-10 border-l border-border-base">
+
+      <!-- PAGE HEADER -->
+      <div style="margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid #262626;">
+        <div class="policy-eyebrow">Legal</div>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-2px;line-height:1.05;margin-bottom:20px;">Privacy Policy</h1>
+        <p class="policy-lead">This policy explains what data Dafine collects when you use it, how that data is used, and what choices you have. We have written it in plain language because we believe you deserve to understand it without a law degree.</p>
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="version-badge"><span class="material-symbols-outlined" style="font-size:13px">calendar_today</span>Effective: 15 June 2025</span>
+          <span class="version-badge"><span class="material-symbols-outlined" style="font-size:13px">tag</span>Version 1.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:#555">Last reviewed: 15 June 2025</span>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: INTRODUCTION ═══════════════════════════ -->
+      <div class="policy-section" id="introduction">
+        <div class="policy-eyebrow">Overview</div>
+        <h2 class="policy-h1">Introduction</h2>
+        <p class="policy-p">Dafine ("we", "us", "the project") is an open-source data cleaning platform. When you use Dafine — whether on a hosted instance or by running it yourself — you may provide personal information and data files. This Privacy Policy describes how that information is handled.</p>
+        <p class="policy-p">By creating an account and using Dafine, you agree to the data practices described in this policy. If you are running a self-hosted instance, this policy applies to you as the operator and you should update it to reflect your own practices before sharing it with your users.</p>
+
+        <div class="policy-note">
+          <div class="policy-note-lbl">Open source &amp; self-hosted</div>
+          <p>Dafine is open source under the MIT License. If you are self-hosting Dafine, you are the data controller for your users, and you are responsible for your own privacy obligations (e.g. GDPR, CCPA). This policy covers the reference hosted deployment only.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: WHO WE ARE ═══════════════════════════ -->
+      <div class="policy-section" id="who-we-are">
+        <div class="policy-eyebrow">Identity</div>
+        <h2 class="policy-h1">Who We Are</h2>
+        <p class="policy-p">Dafine is an open-source project created and maintained by <strong>Michael Vincent Sebastian Handojo</strong>. The hosted instance is provided for general use and evaluation purposes.</p>
+        <p class="policy-p">For any privacy-related enquiries, contact us at the address listed in the <a href="#contact">Contact</a> section below.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: DATA COLLECTED ═══════════════════════════ -->
+      <div class="policy-section" id="data-collected">
+        <div class="policy-eyebrow">Data Practices</div>
+        <h2 class="policy-h1">Data We Collect</h2>
+        <p class="policy-p">We collect only the minimum data necessary to provide the service.</p>
+
+        <h2 class="policy-h2">Account information</h2>
+        <ul class="policy-list">
+          <li><strong>Email address</strong> — used as your login identifier. Never shared with third parties for marketing.</li>
+          <li><strong>Password (hashed)</strong> — stored as an Argon2id hash. We cannot recover your plain-text password.</li>
+          <li><strong>OpenRouter API key (encrypted)</strong> — if you choose to save your key in Account Settings, it is stored encrypted with AES-256-GCM. It is never returned to the browser or logged.</li>
+          <li><strong>Account creation timestamp</strong> — used to display your "Member Since" date.</li>
+        </ul>
+
+        <h2 class="policy-h2">Cleaning session data</h2>
+        <ul class="policy-list">
+          <li><strong>Session title</strong> — the optional label you give a cleaning session.</li>
+          <li><strong>Original filename and file type</strong> — stored as metadata so you can identify sessions in History.</li>
+          <li><strong>Row counts (before and after)</strong> — a summary statistic stored with each session.</li>
+          <li><strong>Column context strings</strong> — the optional descriptions you provide for individual columns. Stored as a JSON object linked to the session.</li>
+          <li><strong>Generated SQL query</strong> — the DuckDB SQL produced by the AI. Stored so you can review it later in History.</li>
+          <li><strong>AI reasoning text</strong> — the model's explanation of its cleaning decisions. Stored with the session.</li>
+          <li><strong>Cleaned file (Parquet)</strong> — the output of the cleaning pipeline, stored in a private Supabase Storage bucket. Accessible only to you via your authenticated session.</li>
+        </ul>
+
+        <h2 class="policy-h2">Technical data</h2>
+        <ul class="policy-list">
+          <li><strong>JWT session token</strong> — stored in your browser's <code style="font-family:'DM Mono',monospace;font-size:11px;background:#1a1a1a;border:1px solid #2e2e2e;padding:1px 5px;color:#f0d000">localStorage</code>. Expires after 24 hours (configurable).</li>
+          <li><strong>Email address (localStorage)</strong> — cached in the browser for display in the navigation bar.</li>
+        </ul>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: DATA NOT COLLECTED ═══════════════════════════ -->
+      <div class="policy-section" id="data-not-collected">
+        <div class="policy-eyebrow">Data Practices</div>
+        <h2 class="policy-h1">Data We Do Not Collect</h2>
+        <p class="policy-p">We want to be explicit about what Dafine does <em>not</em> do:</p>
+        <ul class="policy-list">
+          <li><strong>We do not store your uploaded raw files.</strong> Your original uploaded file is written to a temporary location on the server and deleted immediately after cleaning, inside a <code style="font-family:'DM Mono',monospace;font-size:11px;background:#1a1a1a;border:1px solid #2e2e2e;padding:1px 5px;color:#f0d000">finally</code> block that runs even if an error occurs.</li>
+          <li><strong>We do not send your raw data to any AI.</strong> The AI prompt contains only statistical summaries (null counts, value distributions, column types). Your actual row data is never included in any API call.</li>
+          <li><strong>We do not use tracking cookies.</strong> Dafine does not use analytics cookies, advertising cookies, or any third-party tracking scripts.</li>
+          <li><strong>We do not sell your data.</strong> Your data is never sold, rented, or traded to any third party for any purpose.</li>
+          <li><strong>We do not collect payment information.</strong> Dafine does not process payments. Billing for AI model usage is handled entirely between you and OpenRouter.</li>
+          <li><strong>We do not log your file contents.</strong> Application logs capture request metadata (endpoint, timestamp, HTTP status) but not file contents or query results.</li>
+        </ul>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: HOW WE USE DATA ═══════════════════════════ -->
+      <div class="policy-section" id="how-we-use">
+        <div class="policy-eyebrow">Data Practices</div>
+        <h2 class="policy-h1">How We Use Your Data</h2>
+
+        <table class="policy-table">
+          <thead><tr><th>Data</th><th>Purpose</th><th>Legal basis</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Email address</td>
+              <td>Account login and identification</td>
+              <td>Contract (providing the service)</td>
+            </tr>
+            <tr>
+              <td>Password hash</td>
+              <td>Authenticating your login</td>
+              <td>Contract</td>
+            </tr>
+            <tr>
+              <td>Encrypted API key</td>
+              <td>Decrypted server-side to call OpenRouter on your behalf</td>
+              <td>Contract</td>
+            </tr>
+            <tr>
+              <td>Session metadata (title, filename, row counts)</td>
+              <td>Displayed in your History page; lets you identify past sessions</td>
+              <td>Contract</td>
+            </tr>
+            <tr>
+              <td>Generated SQL &amp; AI reasoning</td>
+              <td>Displayed in History detail view for your review and audit</td>
+              <td>Contract</td>
+            </tr>
+            <tr>
+              <td>Cleaned Parquet file</td>
+              <td>Stored so you can re-download from History at any time</td>
+              <td>Contract</td>
+            </tr>
+            <tr>
+              <td>Column context strings</td>
+              <td>Passed to the AI prompt to improve cleaning quality; stored with the session</td>
+              <td>Contract</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="policy-p">We do not use any of your data for advertising, profiling, model training, or any purpose not listed above.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: DATA STORAGE ═══════════════════════════ -->
+      <div class="policy-section" id="data-storage">
+        <div class="policy-eyebrow">Infrastructure</div>
+        <h2 class="policy-h1">Data Storage &amp; Retention</h2>
+
+        <h2 class="policy-h2">Where your data is stored</h2>
+        <ul class="policy-list">
+          <li><strong>Account data &amp; session metadata</strong> — stored in a Supabase (PostgreSQL) database. Supabase infrastructure is hosted on AWS. Data is encrypted at rest.</li>
+          <li><strong>Cleaned files</strong> — stored in a private Supabase Storage bucket. Files are only accessible via authenticated, signed requests from the backend.</li>
+          <li><strong>Dashboard configurations</strong> — stored only in your browser's <code style="font-family:'DM Mono',monospace;font-size:11px;background:#1a1a1a;border:1px solid #2e2e2e;padding:1px 5px;color:#f0d000">localStorage</code>. They never leave your device.</li>
+        </ul>
+
+        <h2 class="policy-h2">How long we keep your data</h2>
+        <ul class="policy-list">
+          <li><strong>Account data</strong> — retained for as long as your account exists. Deleted upon account deletion (see Your Rights).</li>
+          <li><strong>Cleaning sessions &amp; stored files</strong> — retained indefinitely until you delete them from the History page. Each deletion removes both the database record and the Parquet file from storage.</li>
+          <li><strong>Uploaded raw files</strong> — retained for zero time. Deleted from server memory immediately after processing.</li>
+          <li><strong>JWT tokens</strong> — expire after 24 hours. No server-side token revocation list is currently maintained.</li>
+        </ul>
+
+        <div class="policy-note">
+          <div class="policy-note-lbl">Self-hosted instances</div>
+          <p>If you are running your own Dafine deployment, retention is entirely determined by your own Supabase configuration and infrastructure choices.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: THIRD PARTIES ═══════════════════════════ -->
+      <div class="policy-section" id="third-parties">
+        <div class="policy-eyebrow">Third Parties</div>
+        <h2 class="policy-h1">Third-Party Services</h2>
+        <p class="policy-p">Dafine integrates with a small number of third-party services. Here is exactly what is shared with each:</p>
+
+        <table class="policy-table">
+          <thead><tr><th>Service</th><th>Data shared</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Supabase</td>
+              <td>Account data, session metadata, cleaned Parquet files</td>
+              <td>Hosted database and file storage. Data subject to <a href="https://supabase.com/privacy" target="_blank" style="color:#f0d000">Supabase Privacy Policy</a>.</td>
+            </tr>
+            <tr>
+              <td>OpenRouter</td>
+              <td>Statistical column profile (no raw data). Your decrypted API key is sent in the Authorization header of each AI call.</td>
+              <td>AI model routing. Data subject to <a href="https://openrouter.ai/privacy" target="_blank" style="color:#f0d000">OpenRouter Privacy Policy</a>.</td>
+            </tr>
+            <tr>
+              <td>Railway (deployment)</td>
+              <td>Backend application and environment variables (including .env secrets)</td>
+              <td>Cloud hosting for the backend server. Data subject to <a href="https://railway.app/legal/privacy" target="_blank" style="color:#f0d000">Railway Privacy Policy</a>.</td>
+            </tr>
+            <tr>
+              <td>Google Fonts</td>
+              <td>Browser IP address (standard web font request)</td>
+              <td>Loading DM Mono and Syne typefaces. Subject to <a href="https://policies.google.com/privacy" target="_blank" style="color:#f0d000">Google Privacy Policy</a>.</td>
+            </tr>
+            <tr>
+              <td>jsDelivr (CDN)</td>
+              <td>Browser IP address (standard CDN request)</td>
+              <td>Loading Chart.js from CDN.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="policy-p">No other third-party services receive any data from Dafine. In particular, there are no analytics providers, advertising networks, or social media tracking pixels.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: YOUR RIGHTS ═══════════════════════════ -->
+      <div class="policy-section" id="your-rights">
+        <div class="policy-eyebrow">Your Rights</div>
+        <h2 class="policy-h1">Your Rights &amp; Controls</h2>
+        <p class="policy-p">You have control over your data. Here is what you can do directly within the Dafine interface:</p>
+
+        <ul class="policy-list">
+          <li><strong>View your account data</strong> — your email and account creation date are shown on the Account Settings page.</li>
+          <li><strong>Change your password</strong> — available in Account Settings at any time.</li>
+          <li><strong>Update or remove your API key</strong> — you can paste a new key to overwrite the stored one at any time.</li>
+          <li><strong>Delete individual cleaning sessions</strong> — the delete button in History removes the database record and the stored Parquet file from Supabase Storage permanently.</li>
+          <li><strong>Download your cleaned data</strong> — available from the History page at any time while the session exists.</li>
+          <li><strong>Delete your dashboard configurations</strong> — available in the Dashboard History tab; clears from your browser's localStorage.</li>
+          <li><strong>Log out</strong> — clears your JWT token and cached email from localStorage on this device.</li>
+        </ul>
+
+        <h2 class="policy-h2">Account deletion</h2>
+        <p class="policy-p">Self-service account deletion is not yet implemented in the UI. To request full deletion of your account and all associated data, contact us using the details in the <a href="#contact">Contact</a> section. We will process deletion requests within 30 days.</p>
+
+        <h2 class="policy-h2">Data portability</h2>
+        <p class="policy-p">Your cleaned datasets can be downloaded at any time from the History page in CSV format. Column context and session metadata can be viewed in the History detail panel. If you need a machine-readable export of all your stored data, contact us.</p>
+
+        <h2 class="policy-h2">GDPR / regional rights</h2>
+        <p class="policy-p">If you are located in the European Economic Area (EEA), the United Kingdom, or another region with specific data protection laws, you may have additional rights including the right to access, rectification, erasure, restriction of processing, and the right to lodge a complaint with your local supervisory authority. Contact us to exercise these rights.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: SECURITY ═══════════════════════════ -->
+      <div class="policy-section" id="security">
+        <div class="policy-eyebrow">Security</div>
+        <h2 class="policy-h1">Security</h2>
+        <p class="policy-p">We take reasonable steps to protect your data:</p>
+        <ul class="policy-list">
+          <li><strong>Passwords</strong> — hashed with Argon2id. Never stored in plain text.</li>
+          <li><strong>API keys</strong> — encrypted at rest using AES-256-GCM with a server-side master key. Never stored unencrypted, never logged, never returned to the browser.</li>
+          <li><strong>Session tokens</strong> — HS256 JWTs with a 24-hour expiry, signed with a secret key set by the operator.</li>
+          <li><strong>Transport</strong> — all communication between the frontend and backend uses HTTPS in the hosted deployment.</li>
+          <li><strong>Database access</strong> — the backend uses Supabase's service role key, which is only present in server-side environment variables and never exposed to the browser.</li>
+          <li><strong>Uploaded files</strong> — never persisted. Processed in a temp file and deleted in a <code style="font-family:'DM Mono',monospace;font-size:11px;background:#1a1a1a;border:1px solid #2e2e2e;padding:1px 5px;color:#f0d000">finally</code> block.</li>
+        </ul>
+        <p class="policy-p">No system is completely secure. If you discover a security vulnerability, please disclose it responsibly by contacting us privately before making it public.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: COOKIES ═══════════════════════════ -->
+      <div class="policy-section" id="cookies">
+        <div class="policy-eyebrow">Browser Storage</div>
+        <h2 class="policy-h1">Cookies &amp; Browser Storage</h2>
+        <p class="policy-p">Dafine does not use cookies. It uses browser <code style="font-family:'DM Mono',monospace;font-size:11px;background:#1a1a1a;border:1px solid #2e2e2e;padding:1px 5px;color:#f0d000">localStorage</code> for three purposes:</p>
+
+        <table class="policy-table">
+          <thead><tr><th>Key</th><th>Contents</th><th>Cleared on</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code style="color:#f0d000">dafine_token</code></td>
+              <td>Your JWT session token (expires after 24 hrs)</td>
+              <td>Logout or manual clear</td>
+            </tr>
+            <tr>
+              <td><code style="color:#f0d000">dafine_email</code></td>
+              <td>Your email address (display only in nav bar)</td>
+              <td>Logout or manual clear</td>
+            </tr>
+            <tr>
+              <td><code style="color:#f0d000">dafine_user_id</code></td>
+              <td>Your user ID integer</td>
+              <td>Logout or manual clear</td>
+            </tr>
+            <tr>
+              <td><code style="color:#f0d000">dafine_dashboards</code></td>
+              <td>Up to 30 saved dashboard configurations (chart type, axes, filters, title)</td>
+              <td>Manual delete from Dashboard History, or browser data clear</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="policy-p">You can clear all of this data at any time by clicking <strong>Logout</strong> (which clears the first three keys) or by clearing your browser's localStorage for the Dafine domain.</p>
+        <p class="policy-p">Third-party resources loaded by Dafine (Google Fonts, jsDelivr CDN) may set their own cookies or use other browser storage. We do not control these. Refer to their respective privacy policies.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: CHILDREN ═══════════════════════════ -->
+      <div class="policy-section" id="children">
+        <div class="policy-eyebrow">Eligibility</div>
+        <h2 class="policy-h1">Children's Privacy</h2>
+        <p class="policy-p">Dafine is not directed at children under the age of 13 (or 16 in the EEA). We do not knowingly collect personal information from children. If you believe a child has created an account, please contact us and we will delete the account promptly.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: OPEN SOURCE ═══════════════════════════ -->
+      <div class="policy-section" id="open-source">
+        <div class="policy-eyebrow">Open Source</div>
+        <h2 class="policy-h1">Open Source Notice</h2>
+        <p class="policy-p">Dafine's source code is publicly available under the MIT License. Anyone can inspect the code to verify the data practices described in this policy.</p>
+        <p class="policy-p">If you fork and self-host Dafine, you become the data controller for your own deployment. This Privacy Policy applies only to the reference hosted instance. As operator, you are responsible for updating this policy to reflect your own infrastructure and data flows before publishing it to your users.</p>
+        <p class="policy-p">The MIT License permits commercial and private use. It does not override your legal obligations under applicable data protection law. Running Dafine on data that belongs to others (e.g. your customers) means you must have a lawful basis for processing that data under the laws of your jurisdiction.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: CHANGES ═══════════════════════════ -->
+      <div class="policy-section" id="changes">
+        <div class="policy-eyebrow">Updates</div>
+        <h2 class="policy-h1">Changes to This Policy</h2>
+        <p class="policy-p">We may update this policy from time to time. When we make significant changes, we will update the "Effective" date at the top of this page. Continued use of Dafine after a policy change constitutes acceptance of the new terms.</p>
+        <p class="policy-p">We encourage you to review this page periodically. Because Dafine is open source, all historical versions of this policy are visible in the project's git history.</p>
+
+        <table class="policy-table">
+          <thead><tr><th>Version</th><th>Date</th><th>Summary of changes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>1.0</td>
+              <td>15 June 2025</td>
+              <td>Initial policy published.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: CONTACT ═══════════════════════════ -->
+      <div class="policy-section" id="contact">
+        <div class="policy-eyebrow">Contact</div>
+        <h2 class="policy-h1">Contact</h2>
+        <p class="policy-p">For any questions about this Privacy Policy, to request data deletion, or to report a security concern, please reach out:</p>
+
+        <div style="background:#1a1a1a;border:1px solid #262626;padding:24px 28px;margin-top:8px">
+          <p style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;color:#f5f4f0">Michael Vincent Sebastian Handojo</p>
+          <p class="policy-p" style="margin-bottom:8px">Project maintainer, Dafine</p>
+          <p class="policy-p" style="margin-bottom:4px">
+            <span style="color:#777;font-size:10px;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:3px">GitHub</span>
+            <a href="https://github.com/your-username/dafine" target="_blank" style="color:#f0d000;font-size:12px;font-family:'DM Mono',monospace;text-decoration:none;border-bottom:1px solid rgba(240,208,0,.3)">github.com/your-username/dafine</a>
+          </p>
+        </div>
+
+        <p class="policy-p" style="margin-top:20px">We will respond to all privacy-related requests within 30 days.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="documentation.html"  class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Documentation</a>
+        <a href="privacy-policy.html" class="text-primary-container font-label-sm text-label-sm uppercase tracking-wider">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function setActive(el) {
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    const sections = document.querySelectorAll('.policy-section');
+    const links    = document.querySelectorAll('.sidebar-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const match = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { threshold: 0.25 });
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
