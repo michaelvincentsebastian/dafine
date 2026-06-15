@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dafine — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syne:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-primary": "#f5f4f0", "primary-fixed-dim": "#e4c600",
+            "background": "#131313", "on-primary": "#393000",
+            "on-surface": "#e5e2e1", "surface-container": "#201f1f",
+            "surface-container-lowest": "#0e0e0e", "on-background": "#e5e2e1",
+            "status-error": "#e57373", "on-surface-variant": "#cfc6ab",
+            "primary-fixed": "#ffe250", "text-secondary": "#777777",
+            "surface": "#131313", "surface-bright": "#3a3939",
+            "on-primary-container": "#685900", "surface-variant": "#353534",
+            "primary-container": "#f0d000", "accent-hover": "#c9ae00",
+            "surface-container-highest": "#353534", "surface-container-low": "#1c1b1b",
+            "on-primary-fixed": "#211b00", "primary": "#ffeda4",
+            "border-base": "#262626", "border-muted": "#2e2e2e",
+            "secondary": "#c8c6c5", "surface-container-high": "#2a2a2a",
+            "surface-tertiary": "#242424",
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+          spacing: { "gutter": "1px", "gap-sm": "8px", "container-max": "1100px", "gap-md": "16px", "gap-lg": "24px", "margin-desktop": "32px", "margin-mobile": "16px" },
+          fontFamily: { "label-sm": ["DM Mono"], "label-md": ["DM Mono"], "micro-tag": ["DM Mono"], "ui-header": ["Syne"], "headline-sm": ["Syne"], "headline-lg": ["Syne"], "headline-lg-mobile": ["Syne"], "body-md": ["DM Mono"] },
+          fontSize: {
+            "label-sm": ["10px", { lineHeight: "1.4", fontWeight: "500" }],
+            "label-md": ["11px", { lineHeight: "1.5", fontWeight: "400" }],
+            "micro-tag": ["9px", { lineHeight: "1.2", fontWeight: "500" }],
+            "ui-header": ["16px", { lineHeight: "1.4", fontWeight: "700" }],
+            "headline-sm": ["21px", { lineHeight: "1.2", fontWeight: "800" }],
+            "headline-lg": ["36px", { lineHeight: "1.1", fontWeight: "800" }],
+            "headline-lg-mobile": ["32px", { lineHeight: "1.1", fontWeight: "800" }],
+            "body-md": ["12px", { lineHeight: "1.8", fontWeight: "400" }],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #131313; color: #f5f4f0; min-height: 100vh; display: flex; flex-direction: column; }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.04; pointer-events: none; z-index: 9999;
+    }
+    .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; display: inline-block; white-space: nowrap; -webkit-font-smoothing: antialiased; }
+
+    /* ── Sidebar nav ── */
+    .sidebar { position: sticky; top: 80px; height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #262626 transparent; }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #262626; }
+    .sidebar-link { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; padding: 8px 14px; color: #777; cursor: pointer; border-left: 2px solid transparent; transition: all .18s; text-decoration: none; }
+    .sidebar-link:hover { color: #f5f4f0; border-left-color: #2e2e2e; }
+    .sidebar-link.active { color: #f0d000; border-left-color: #f0d000; }
+    .sidebar-group { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: #444; padding: 18px 14px 6px; }
+
+    /* ── Content prose ── */
+    .doc-section { padding-bottom: 64px; border-bottom: 1px solid #262626; margin-bottom: 64px; }
+    .doc-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .doc-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: #f0d000; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+    .doc-eyebrow::before { content: ''; width: 16px; height: 1px; background: #f0d000; }
+    .doc-h1 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px; }
+    .doc-h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-top: 40px; margin-bottom: 12px; color: #f5f4f0; }
+    .doc-h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-top: 28px; margin-bottom: 8px; color: #e0ddd8; }
+    .doc-p { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; color: #aaa; margin-bottom: 14px; }
+    .doc-p strong { color: #f5f4f0; font-weight: 500; }
+    .doc-lead { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; color: #999; margin-bottom: 28px; }
+
+    /* ── Code blocks ── */
+    .code-block { background: #0e0e0e; border: 1px solid #262626; padding: 16px 18px; font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.7; color: #f5f4f0; overflow-x: auto; margin: 14px 0 20px; white-space: pre; }
+    .code-inline { font-family: 'DM Mono', monospace; font-size: 11px; background: #1a1a1a; border: 1px solid #2e2e2e; padding: 1px 6px; color: #f0d000; }
+
+    /* ── Pipeline diagram ── */
+    .pipeline-doc { display: flex; align-items: stretch; gap: 0; margin: 24px 0 32px; flex-wrap: wrap; }
+    .pipe-step { flex: 1; min-width: 100px; background: #1a1a1a; border: 1px solid #262626; padding: 16px 14px; position: relative; }
+    .pipe-step + .pipe-step { border-left: none; }
+    .pipe-num { font-family: 'DM Mono', monospace; font-size: 9px; color: #f0d000; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; }
+    .pipe-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .pipe-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: #777; line-height: 1.5; }
+    .pipe-arrow { font-family: 'DM Mono', monospace; font-size: 16px; color: #333; display: flex; align-items: center; padding: 0 4px; }
+
+    /* ── Info/note boxes ── */
+    .doc-note { background: rgba(240, 208, 0, .05); border: 1px solid rgba(240, 208, 0, .2); border-left: 3px solid #f0d000; padding: 12px 16px; margin: 16px 0 20px; }
+    .doc-note-lbl { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: #f0d000; margin-bottom: 6px; }
+    .doc-note p { font-family: 'DM Mono', monospace; font-size: 11px; color: #999; line-height: 1.7; margin: 0; }
+    .doc-warn { background: rgba(229, 115, 115, .05); border: 1px solid rgba(229, 115, 115, .2); border-left: 3px solid #e57373; padding: 12px 16px; margin: 16px 0 20px; }
+    .doc-warn-lbl { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: #e57373; margin-bottom: 6px; }
+    .doc-warn p { font-family: 'DM Mono', monospace; font-size: 11px; color: #999; line-height: 1.7; margin: 0; }
+
+    /* ── Table ── */
+    .doc-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 11px; margin: 16px 0 24px; }
+    .doc-table th { background: #1a1a1a; color: #777; padding: 10px 14px; text-transform: uppercase; font-size: 9px; letter-spacing: .1em; border-bottom: 1px solid #262626; text-align: left; }
+    .doc-table td { padding: 10px 14px; border-bottom: 1px solid #1e1e1e; color: #ccc; vertical-align: top; line-height: 1.6; }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table td:first-child { color: #f0d000; font-weight: 500; white-space: nowrap; }
+
+    /* ── Badges / labels ── */
+    .tag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; background: #1a1a1a; border: 1px solid #262626; color: #ccc; margin-right: 4px; }
+    .tag.yellow { background: rgba(240,208,0,.1); border-color: rgba(240,208,0,.3); color: #f0d000; }
+    .tag.green  { background: rgba(76,175,80,.1); border-color: rgba(76,175,80,.3); color: #4caf50; }
+    .tag.red    { background: rgba(229,115,115,.1); border-color: rgba(229,115,115,.3); color: #e57373; }
+
+    /* ── SQL highlight ── */
+    .sql-kw { color: #f0d000; font-weight: 500; }
+
+    /* ── TOC mobile toggle ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .sidebar.open { display: block; position: fixed; inset: 0; top: 65px; z-index: 100; background: #131313; border-right: 1px solid #262626; width: 260px; }
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- NAV -->
+  <nav class="border-b border-border-base bg-background/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex items-center justify-between w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-5">
+      <a href="main.html" class="flex items-baseline gap-2">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da<span class="text-primary-container">+</span>fine</span>
+        <span class="font-micro-tag text-micro-tag text-text-secondary border border-border-base px-1.5 py-0.5 uppercase tracking-widest">Beta</span>
+      </a>
+      <div class="hidden md:flex items-center gap-gap-lg">
+        <a href="main.html"              class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Clean</a>
+        <a href="dashboard.html"         class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Dashboard</a>
+        <a href="history.html"           class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">History</a>
+        <a href="account-settings.html"  class="text-text-secondary font-label-md text-label-md hover:text-text-primary transition-colors px-3 py-1">Account</a>
+        <a href="documentation.html"     class="text-primary-container font-label-md text-label-md border-b border-primary-container px-3 py-1">Docs</a>
+      </div>
+      <button class="md:hidden text-text-secondary" onclick="document.getElementById('mob-sidebar').classList.toggle('open')">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="flex flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop gap-0">
+
+    <!-- SIDEBAR -->
+    <aside id="mob-sidebar" class="sidebar w-56 flex-shrink-0 pr-4 pt-8">
+      <div class="sidebar-group">Overview</div>
+      <a href="#what-is-dafine" class="sidebar-link active" onclick="setActive(this)">What is Dafine</a>
+      <a href="#how-it-works"   class="sidebar-link" onclick="setActive(this)">How it Works</a>
+      <a href="#tech-stack"     class="sidebar-link" onclick="setActive(this)">Tech Stack</a>
+
+      <div class="sidebar-group">Getting Started</div>
+      <a href="#prerequisites"  class="sidebar-link" onclick="setActive(this)">Prerequisites</a>
+      <a href="#installation"   class="sidebar-link" onclick="setActive(this)">Installation</a>
+      <a href="#env-variables"  class="sidebar-link" onclick="setActive(this)">Environment Variables</a>
+      <a href="#running"        class="sidebar-link" onclick="setActive(this)">Running Locally</a>
+
+      <div class="sidebar-group">Features</div>
+      <a href="#upload"         class="sidebar-link" onclick="setActive(this)">Upload & Preview</a>
+      <a href="#ai-cleaning"    class="sidebar-link" onclick="setActive(this)">AI Cleaning Pipeline</a>
+      <a href="#column-context" class="sidebar-link" onclick="setActive(this)">Column Context</a>
+      <a href="#dashboard"      class="sidebar-link" onclick="setActive(this)">Dashboard</a>
+      <a href="#history"        class="sidebar-link" onclick="setActive(this)">History</a>
+
+      <div class="sidebar-group">Backend API</div>
+      <a href="#api-endpoints"  class="sidebar-link" onclick="setActive(this)">Endpoints</a>
+      <a href="#auth"           class="sidebar-link" onclick="setActive(this)">Authentication</a>
+      <a href="#supported-files"class="sidebar-link" onclick="setActive(this)">Supported Files</a>
+
+      <div class="sidebar-group">Security</div>
+      <a href="#security"       class="sidebar-link" onclick="setActive(this)">Security Model</a>
+      <a href="#openrouter"     class="sidebar-link" onclick="setActive(this)">OpenRouter Key</a>
+
+      <div class="sidebar-group">Reference</div>
+      <a href="#faq"            class="sidebar-link" onclick="setActive(this)">FAQ</a>
+      <a href="#limits"         class="sidebar-link" onclick="setActive(this)">Known Limits</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow min-w-0 py-12 pl-0 md:pl-10 border-l border-border-base">
+
+      <!-- ═══════════════════════════ SECTION: WHAT IS DAFINE ═══════════════════════════ -->
+      <div class="doc-section" id="what-is-dafine">
+        <div class="doc-eyebrow">Overview</div>
+        <h1 class="doc-h1">What is Dafine?</h1>
+        <p class="doc-lead">Dafine (Da+fine) is an open-source, AI-powered data cleaning platform. You upload a messy dataset — CSV, Parquet, Excel, or SQLite — and Dafine profiles it, constructs a targeted prompt, calls an LLM via OpenRouter, executes the generated DuckDB SQL, and returns a clean file.</p>
+        <p class="doc-p">The goal is to automate the tedious, repetitive parts of data preparation: filling missing values with statistically appropriate defaults, normalising inconsistent string casing, removing duplicates, and flagging outliers — without requiring you to write a single line of SQL yourself.</p>
+        <p class="doc-p">Dafine is built as a standard web app: a <strong>FastAPI</strong> backend and a pure-HTML/JS frontend. There is no framework lock-in. You can run it locally in under five minutes or deploy it to any cloud that accepts a Dockerfile.</p>
+
+        <div class="doc-note">
+          <div class="doc-note-lbl">Open Source</div>
+          <p>Dafine is released under the MIT License. You are free to use, fork, and modify it for any purpose. See <code class="code-inline">LICENSE</code> in the repository root.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: HOW IT WORKS ═══════════════════════════ -->
+      <div class="doc-section" id="how-it-works">
+        <div class="doc-eyebrow">Architecture</div>
+        <h1 class="doc-h1">How it Works</h1>
+        <p class="doc-lead">Every cleaning request travels through a six-step pipeline, all server-side. Your raw file never leaves the backend until you download the clean result.</p>
+
+        <div class="pipeline-doc">
+          <div class="pipe-step">
+            <div class="pipe-num">Step 1</div>
+            <div class="pipe-title">Upload</div>
+            <div class="pipe-sub">File is written to a temp path on the server. Extension validated.</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="pipe-num">Step 2</div>
+            <div class="pipe-title">Profile</div>
+            <div class="pipe-sub">DuckDB scans every column: nulls, skewness, IQR, mode, unique count, labels.</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="pipe-num">Step 3</div>
+            <div class="pipe-title">Prompt</div>
+            <div class="pipe-sub">Per-column instructions assembled into a structured DuckDB SQL prompt.</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="pipe-num">Step 4</div>
+            <div class="pipe-title">AI</div>
+            <div class="pipe-sub">OpenRouter LLM returns a single <code class="code-inline">CREATE TABLE cleaned_table AS …</code> statement.</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="pipe-num">Step 5</div>
+            <div class="pipe-title">Execute</div>
+            <div class="pipe-sub">DuckDB runs the SQL. Output exported to the original format (CSV / Parquet / XLSX).</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="pipe-num">Step 6</div>
+            <div class="pipe-title">Save</div>
+            <div class="pipe-sub">Cleaned Parquet saved to Supabase Storage. Metadata stored in DB. File returned to browser.</div>
+          </div>
+        </div>
+
+        <h2 class="doc-h2">Deep Profiling</h2>
+        <p class="doc-p">Before any AI call, Dafine runs a thorough statistical pass over every column using DuckDB's native aggregation functions. The collected stats directly drive the imputation strategy chosen for each column:</p>
+
+        <table class="doc-table">
+          <thead><tr><th>Stat</th><th>How it's used</th></tr></thead>
+          <tbody>
+            <tr><td>Null %</td><td>Columns with &gt;40% nulls get the <code class="code-inline">HIGH_NULL</code> label so the AI knows imputation is risky.</td></tr>
+            <tr><td>Skewness</td><td>|skew| &gt; 0.5 → median fill. Near-zero skew → mean fill. Avoids outlier-contaminated means.</td></tr>
+            <tr><td>IQR (Tukey)</td><td>Outliers defined as values outside Q1 − 1.5×IQR or Q3 + 1.5×IQR. Counted per column and reported post-clean.</td></tr>
+            <tr><td>Unique count</td><td>≤20 unique values &amp; &lt;5% of rows → <code class="code-inline">LIKELY_CATEGORICAL</code>. Uses mode fill instead of mean.</td></tr>
+            <tr><td>Avg string length</td><td>&gt;100 chars → <code class="code-inline">LONG_TEXT</code>. Those columns are passed through untransformed.</td></tr>
+            <tr><td>Casing check</td><td>If <code class="code-inline">LOWER(col)</code> has fewer uniques than <code class="code-inline">col</code>, column gets <code class="code-inline">MIXED_CASING</code> → <code class="code-inline">LOWER(TRIM(…))</code> applied.</td></tr>
+            <tr><td>Keyword detection</td><td>Column names containing <em>date / time / year / timestamp / created / updated</em> get <code class="code-inline">TIME_SERIES</code> → forward-fill strategy.</td></tr>
+            <tr><td>Financial keywords</td><td><em>revenue / cost / profit / price / …</em> columns grouped. AI may derive missing values from correlated peers.</td></tr>
+            <tr><td>Duplicate rows</td><td>Exact-row duplicates counted. If &gt;0, a <code class="code-inline">SELECT DISTINCT</code> is added to the generated SQL's CTE.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Prompt Construction</h2>
+        <p class="doc-p">The prompt passed to the LLM is fully deterministic — it is built from the profiling output, not from freeform text. For each column, the prompt includes: the null strategy, the computed fill value, applicable labels, top-value distribution, and any user-provided column context.</p>
+        <p class="doc-p">The AI is instructed to output <strong>only raw SQL</strong> — no markdown fences, no comments, no prose. The backend strips any stray formatting before handing the SQL to DuckDB.</p>
+
+        <h2 class="doc-h2">Outlier Report</h2>
+        <p class="doc-p">After the cleaned table is created, a second IQR pass runs on <code class="code-inline">cleaned_table</code> (not the source). The result is sent back in the <code class="code-inline">X-Outlier-Report</code> response header as a compact JSON object and rendered in the UI so you can decide whether to action the remaining outliers manually.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: TECH STACK ═══════════════════════════ -->
+      <div class="doc-section" id="tech-stack">
+        <div class="doc-eyebrow">Architecture</div>
+        <h1 class="doc-h1">Tech Stack</h1>
+
+        <table class="doc-table">
+          <thead><tr><th>Layer</th><th>Technology</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>Backend</td><td>FastAPI 0.111+</td><td>HTTP API, file handling, streaming responses</td></tr>
+            <tr><td>Query engine</td><td>DuckDB 1.0+</td><td>In-process SQL: profiling, executing AI SQL, exporting</td></tr>
+            <tr><td>AI</td><td>OpenRouter API</td><td>Routes prompt to chosen LLM (<code class="code-inline">openai/gpt-oss-120b:free</code> default)</td></tr>
+            <tr><td>Auth</td><td>JWT HS256 + Argon2id</td><td>Session tokens; password hashing</td></tr>
+            <tr><td>Key storage</td><td>AES-256-GCM</td><td>OpenRouter API key encrypted at rest per user</td></tr>
+            <tr><td>Database</td><td>Supabase (Postgres)</td><td>Users, cleaning history, AI output, column context</td></tr>
+            <tr><td>File storage</td><td>Supabase Storage</td><td>Cleaned files stored as Parquet, downloaded as CSV</td></tr>
+            <tr><td>Frontend</td><td>Vanilla HTML/JS + Tailwind CDN</td><td>No build step required</td></tr>
+            <tr><td>Charts</td><td>Chart.js 4.4</td><td>Dashboard visualisations</td></tr>
+            <tr><td>Containerisation</td><td>Docker</td><td>Single-image backend, compatible with Railway / Fly / Render</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: PREREQUISITES ═══════════════════════════ -->
+      <div class="doc-section" id="prerequisites">
+        <div class="doc-eyebrow">Getting Started</div>
+        <h1 class="doc-h1">Prerequisites</h1>
+        <p class="doc-p">Before running Dafine locally, make sure you have the following:</p>
+        <table class="doc-table">
+          <thead><tr><th>Requirement</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Python 3.11+</td><td>Required by the FastAPI backend and DuckDB bindings.</td></tr>
+            <tr><td>pip</td><td>Used to install Python dependencies from <code class="code-inline">requirements.txt</code>.</td></tr>
+            <tr><td>Supabase project</td><td>Free tier is sufficient. You need the project URL and service role key.</td></tr>
+            <tr><td>OpenRouter account</td><td>Free-tier models are supported. Get your key at <a href="https://openrouter.ai" target="_blank" style="color:#f0d000">openrouter.ai</a>.</td></tr>
+            <tr><td>A live-server tool</td><td>For the frontend: VS Code Live Server, <code class="code-inline">npx serve</code>, or any static file server.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Supabase Schema</h2>
+        <p class="doc-p">Create the following tables in your Supabase project's SQL editor:</p>
+        <pre class="code-block">-- Users table
+CREATE TABLE users (
+  id               BIGSERIAL PRIMARY KEY,
+  email            TEXT UNIQUE NOT NULL,
+  password_hash    TEXT NOT NULL,
+  encrypted_api_key TEXT,
+  created_at       TIMESTAMPTZ DEFAULT now(),
+  updated_at       TIMESTAMPTZ DEFAULT now()
+);
+
+-- Column context (optional per-session context)
+CREATE TABLE column_context (
+  id      BIGSERIAL PRIMARY KEY,
+  context JSONB
+);
+
+-- AI output (SQL + reasoning stored per session)
+CREATE TABLE ai_output (
+  id          BIGSERIAL PRIMARY KEY,
+  sql_query   TEXT,
+  explanation TEXT
+);
+
+-- Clean file metadata
+CREATE TABLE clean_file (
+  id            BIGSERIAL PRIMARY KEY,
+  user_id       BIGINT REFERENCES users(id),
+  original_name TEXT,
+  name          TEXT,
+  type          TEXT,
+  location      TEXT,
+  size_bytes    BIGINT,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- Cleaning history
+CREATE TABLE cleaning_history (
+  id                 BIGSERIAL PRIMARY KEY,
+  user_id            BIGINT REFERENCES users(id),
+  title              TEXT,
+  original_file_name TEXT,
+  original_file_type TEXT,
+  original_file_size BIGINT,
+  rows_before        BIGINT,
+  rows_after         BIGINT,
+  status             TEXT DEFAULT 'completed',
+  column_context_id  BIGINT REFERENCES column_context(id),
+  ai_output_id       BIGINT REFERENCES ai_output(id),
+  clean_file_id      BIGINT REFERENCES clean_file(id),
+  created_at         TIMESTAMPTZ DEFAULT now()
+);</pre>
+
+        <p class="doc-p">Also create a private Supabase Storage bucket named <code class="code-inline">dafine-files</code>.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: INSTALLATION ═══════════════════════════ -->
+      <div class="doc-section" id="installation">
+        <div class="doc-eyebrow">Getting Started</div>
+        <h1 class="doc-h1">Installation</h1>
+
+        <h2 class="doc-h2">Clone the repository</h2>
+        <pre class="code-block">git clone https://github.com/your-username/dafine.git
+cd dafine</pre>
+
+        <h2 class="doc-h2">Create a Python virtual environment</h2>
+        <pre class="code-block">python -m venv .venv
+
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows
+.venv\Scripts\activate</pre>
+
+        <h2 class="doc-h2">Install backend dependencies</h2>
+        <pre class="code-block">cd backend
+pip install -r requirements.txt</pre>
+
+        <p class="doc-p">The <code class="code-inline">requirements.txt</code> includes: FastAPI, Uvicorn, DuckDB, Pandas, httpx, Argon2-cffi, cryptography, PyJWT, Supabase Python client, and openpyxl.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: ENV VARIABLES ═══════════════════════════ -->
+      <div class="doc-section" id="env-variables">
+        <div class="doc-eyebrow">Getting Started</div>
+        <h1 class="doc-h1">Environment Variables</h1>
+        <p class="doc-p">Create a <code class="code-inline">.env</code> file inside the <code class="code-inline">backend/</code> directory:</p>
+        <pre class="code-block"># Supabase
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_KEY=your-supabase-service-role-key
+
+# JWT session signing key (generate with: openssl rand -hex 32)
+JWT_SECRET=replace-with-a-long-random-string
+JWT_EXPIRE_HOURS=24
+
+# AES-256-GCM key for encrypting user API keys (must decode to 32 bytes)
+# Generate with: python -c "import os,base64; print(base64.b64encode(os.urandom(32)).decode())"
+ENCRYPTION_KEY=your-base64-32-byte-key
+
+# Optional: fallback OpenRouter key (overridden by per-user keys)
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=openai/gpt-oss-120b:free</pre>
+
+        <div class="doc-warn">
+          <div class="doc-warn-lbl">Never commit .env</div>
+          <p>The <code class="code-inline">.env</code> file is listed in <code class="code-inline">.dockerignore</code> and must also be in your <code class="code-inline">.gitignore</code>. Exposing <code class="code-inline">SUPABASE_SERVICE_KEY</code> or <code class="code-inline">ENCRYPTION_KEY</code> would compromise all user data.</p>
+        </div>
+
+        <table class="doc-table">
+          <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>SUPABASE_URL</td><td><span class="tag red">Required</span></td><td>Your Supabase project URL.</td></tr>
+            <tr><td>SUPABASE_SERVICE_KEY</td><td><span class="tag red">Required</span></td><td>Service role key — bypasses Row Level Security so the backend can read/write all user rows.</td></tr>
+            <tr><td>JWT_SECRET</td><td><span class="tag red">Required</span></td><td>Random string used to sign JWT session tokens. Change this before going to production.</td></tr>
+            <tr><td>ENCRYPTION_KEY</td><td><span class="tag red">Required</span></td><td>Base64-encoded 32-byte key for AES-256-GCM encryption of stored OpenRouter API keys.</td></tr>
+            <tr><td>JWT_EXPIRE_HOURS</td><td><span class="tag">Optional</span></td><td>Token lifetime in hours. Defaults to 24.</td></tr>
+            <tr><td>OPENROUTER_API_KEY</td><td><span class="tag">Optional</span></td><td>Fallback key used if a user has not saved their own key. Useful for testing.</td></tr>
+            <tr><td>OPENROUTER_MODEL</td><td><span class="tag">Optional</span></td><td>Model string passed to OpenRouter. Defaults to <code class="code-inline">openai/gpt-oss-120b:free</code>.</td></tr>
+            <tr><td>PORT</td><td><span class="tag">Optional</span></td><td>Port the Uvicorn server binds to. Defaults to 8000. Set automatically by most cloud platforms.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: RUNNING ═══════════════════════════ -->
+      <div class="doc-section" id="running">
+        <div class="doc-eyebrow">Getting Started</div>
+        <h1 class="doc-h1">Running Locally</h1>
+
+        <h2 class="doc-h2">Start the backend</h2>
+        <pre class="code-block">cd backend
+uvicorn main:app --reload --port 8000</pre>
+        <p class="doc-p">The API is now available at <code class="code-inline">http://127.0.0.1:8000</code>. You can explore the auto-generated docs at <code class="code-inline">http://127.0.0.1:8000/docs</code>.</p>
+
+        <h2 class="doc-h2">Serve the frontend</h2>
+        <p class="doc-p">Open <code class="code-inline">frontend/index.html</code> (or <code class="code-inline">login.html</code>) with a live-server tool:</p>
+        <pre class="code-block"># With VS Code Live Server: right-click login.html → Open with Live Server
+# Result: http://127.0.0.1:5500/frontend/login.html
+
+# Or with npx:
+npx serve frontend
+# Result: http://localhost:3000/login.html</pre>
+
+        <div class="doc-note">
+          <div class="doc-note-lbl">API URL</div>
+          <p>The frontend files hardcode the backend URL to <code class="code-inline">https://dafine-production.up.railway.app</code> (the deployed instance). For local development, find the <code class="code-inline">const API = '...'</code> line at the top of each HTML file's <code class="code-inline">&lt;script&gt;</code> block and change it to <code class="code-inline">http://127.0.0.1:8000</code>.</p>
+        </div>
+
+        <h2 class="doc-h2">Docker (optional)</h2>
+        <pre class="code-block">cd backend
+docker build -t dafine-backend .
+docker run -p 8000:8000 --env-file .env dafine-backend</pre>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: UPLOAD ═══════════════════════════ -->
+      <div class="doc-section" id="upload">
+        <div class="doc-eyebrow">Features</div>
+        <h1 class="doc-h1">Upload &amp; Preview</h1>
+        <p class="doc-lead">The first page a logged-in user sees is the Clean page (<code class="code-inline">main.html</code>). Drag a file onto the drop zone or click "Choose File".</p>
+
+        <h2 class="doc-h2">Supported formats</h2>
+        <table class="doc-table">
+          <thead><tr><th>Extension</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>.csv</td><td>Auto-detected delimiter via DuckDB's <code class="code-inline">read_csv_auto</code>.</td></tr>
+            <tr><td>.parquet</td><td>Columnar binary format. Loaded with <code class="code-inline">read_parquet</code>.</td></tr>
+            <tr><td>.xlsx / .xls</td><td>Loaded via DuckDB's <code class="code-inline">spatial</code> extension (<code class="code-inline">st_read</code>). First sheet only.</td></tr>
+            <tr><td>.db / .sqlite</td><td>Attached as a SQLite database. First table is used as the source.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Preview endpoint</h2>
+        <p class="doc-p">Clicking <strong>Preview Dataset</strong> calls <code class="code-inline">POST /preview</code>. The backend reads the file into a temporary DuckDB view named <code class="code-inline">source_table</code> and returns:</p>
+        <ul style="font-family:'DM Mono',monospace;font-size:12px;color:#aaa;line-height:2;list-style:none;padding-left:16px;margin-bottom:16px">
+          <li>→ File type, total rows, total columns, total null count</li>
+          <li>→ Column names and DuckDB inferred types</li>
+          <li>→ First 10 rows as a JSON array</li>
+        </ul>
+        <p class="doc-p">The preview renders a metadata grid, column type chips, and a scrollable data table so you can sanity-check the file before running the (billable) AI cleaning step.</p>
+
+        <h2 class="doc-h2">Session title</h2>
+        <p class="doc-p">Above the drop zone is an optional <strong>Session Title</strong> field. Whatever you type here is stored with the cleaning record in the database and shown in History. If left blank, the original filename is used.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: AI CLEANING ═══════════════════════════ -->
+      <div class="doc-section" id="ai-cleaning">
+        <div class="doc-eyebrow">Features</div>
+        <h1 class="doc-h1">AI Cleaning Pipeline</h1>
+        <p class="doc-lead">Clicking <strong>Clean with AI</strong> triggers <code class="code-inline">POST /clean</code>. This is the core endpoint — it runs all six steps and streams back the cleaned file.</p>
+
+        <h2 class="doc-h2">What the AI generates</h2>
+        <p class="doc-p">The LLM is given a strict prompt that demands exactly one SQL statement beginning with <code class="code-inline">CREATE TABLE cleaned_table AS</code>. A typical output looks like:</p>
+        <pre class="code-block"><span class="sql-kw">CREATE TABLE</span> cleaned_table <span class="sql-kw">AS</span>
+<span class="sql-kw">WITH</span> base <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT DISTINCT</span> "id", "name", "age", "salary", "department", "hire_date"
+  <span class="sql-kw">FROM</span> source_table
+)
+<span class="sql-kw">SELECT</span>
+  "id",
+  LOWER(TRIM(<span class="sql-kw">COALESCE</span>("name", 'Unknown'))) <span class="sql-kw">AS</span> "name",
+  <span class="sql-kw">COALESCE</span>("age", 32) <span class="sql-kw">AS</span> "age",
+  <span class="sql-kw">COALESCE</span>("salary", 58400.0) <span class="sql-kw">AS</span> "salary",
+  LOWER(TRIM(<span class="sql-kw">COALESCE</span>("department", 'Engineering'))) <span class="sql-kw">AS</span> "department",
+  <span class="sql-kw">COALESCE</span>("hire_date", '2023-01-01') <span class="sql-kw">AS</span> "hire_date"
+<span class="sql-kw">FROM</span> base;</pre>
+
+        <h2 class="doc-h2">Response headers</h2>
+        <p class="doc-p">Alongside the file binary, <code class="code-inline">/clean</code> sends several custom headers that the frontend reads:</p>
+        <table class="doc-table">
+          <thead><tr><th>Header</th><th>Contents</th></tr></thead>
+          <tbody>
+            <tr><td>X-AI-SQL</td><td>The full SQL that was executed (URL-encoded).</td></tr>
+            <tr><td>X-AI-Reasoning</td><td>The LLM's <code class="code-inline">reasoning</code> field, if the model supports it.</td></tr>
+            <tr><td>X-Outlier-Report</td><td>JSON object mapping numeric column names to IQR stats and outlier counts.</td></tr>
+            <tr><td>X-History-ID</td><td>The ID of the newly created cleaning_history record.</td></tr>
+            <tr><td>Content-Disposition</td><td>Filename for the downloaded file, e.g. <code class="code-inline">sales_cleaned.csv</code>.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Output format</h2>
+        <p class="doc-p">Dafine returns the cleaned file in the same format you uploaded whenever possible. SQLite files are exported as CSV (DuckDB cannot write SQLite). If Pandas/openpyxl is unavailable, XLSX also falls back to CSV.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: COLUMN CONTEXT ═══════════════════════════ -->
+      <div class="doc-section" id="column-context">
+        <div class="doc-eyebrow">Features</div>
+        <h1 class="doc-h1">Column Context</h1>
+        <p class="doc-lead">After previewing your data, each column has an optional free-text input below the preview table. This is the <strong>Column Context</strong> grid.</p>
+
+        <p class="doc-p">The text you enter here is injected into the AI prompt as a <code class="code-inline">[USER CONTEXT: …]</code> annotation for that specific column, and it takes the highest priority over any automatically computed strategy. Use it to clarify domain meaning that the profiler cannot infer from statistics alone.</p>
+
+        <h2 class="doc-h2">Examples</h2>
+        <table class="doc-table">
+          <thead><tr><th>Column</th><th>Context you provide</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>gender</td><td><code class="code-inline">1=Male, 2=Female, 3=Non-binary</code></td><td>AI treats numeric values as category codes, not quantities.</td></tr>
+            <tr><td>price</td><td><code class="code-inline">in USD, should never be negative</code></td><td>AI may add a guard clause clamping to 0.</td></tr>
+            <tr><td>notes</td><td><code class="code-inline">free-text field, do not modify or truncate</code></td><td>AI passes the column through untouched even if WHITESPACE_ISSUE is flagged.</td></tr>
+            <tr><td>status</td><td><code class="code-inline">active / inactive / pending only</code></td><td>AI can replace any other value with a NULL or the mode.</td></tr>
+          </tbody>
+        </table>
+
+        <p class="doc-p">Context strings are saved to the <code class="code-inline">column_context</code> table and shown in the History detail panel so you can review what guidance was given to the AI for past sessions.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: DASHBOARD ═══════════════════════════ -->
+      <div class="doc-section" id="dashboard">
+        <div class="doc-eyebrow">Features</div>
+        <h1 class="doc-h1">Dashboard</h1>
+        <p class="doc-lead">The Dashboard (<code class="code-inline">dashboard.html</code>) lets you load any previously cleaned dataset and build interactive charts — no code required.</p>
+
+        <h2 class="doc-h2">Loading a dataset</h2>
+        <p class="doc-p">Click <strong>Load Dataset</strong> to open the session picker. Select any completed cleaning session; the backend downloads the stored Parquet from Supabase Storage, converts it to CSV on the fly, and streams it to the browser. The browser then parses the CSV in-memory using a custom parser.</p>
+
+        <h2 class="doc-h2">Chart types</h2>
+        <p class="doc-p">Five chart types are available via the toolbar: <span class="tag yellow">Bar</span> <span class="tag yellow">Line</span> <span class="tag yellow">Scatter</span> <span class="tag yellow">Pie</span> <span class="tag yellow">Doughnut</span>. All are rendered by Chart.js 4.4.</p>
+
+        <h2 class="doc-h2">Configuration options</h2>
+        <table class="doc-table">
+          <thead><tr><th>Control</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>X-Axis / Labels</td><td>The column whose distinct values form the chart's X axis or pie slices.</td></tr>
+            <tr><td>Y-Axis / Values</td><td>One or more numeric columns plotted as series. Click <strong>Add</strong> for multi-series charts.</td></tr>
+            <tr><td>Aggregation</td><td>None (raw), Sum, Average, Count, Max, Min. Applied per X-axis group.</td></tr>
+            <tr><td>Sort</td><td>Sort by any column, ascending or descending, before rendering.</td></tr>
+            <tr><td>Rank Limit</td><td>Restrict to Top N or Bottom N rows (applied after sort).</td></tr>
+            <tr><td>Filters</td><td>Row-level filters: =, !=, &gt;, &lt;, ≥, ≤, contains. Multiple filters stack (AND logic).</td></tr>
+            <tr><td>Legend / Grid</td><td>Toggle Chart.js legend and gridlines.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Saving dashboards</h2>
+        <p class="doc-p">Click <strong>Save</strong> to persist the full chart configuration (type, axes, series, filters, sort, rank, display options, title) to <code class="code-inline">localStorage</code> under the key <code class="code-inline">dafine_dashboards</code>. Up to 30 dashboards are kept. Saved dashboards appear in the History page's <strong>Dashboard History</strong> tab and can be reopened via a URL parameter (<code class="code-inline">dashboard.html?history_id=123</code>).</p>
+
+        <div class="doc-note">
+          <div class="doc-note-lbl">Storage note</div>
+          <p>Dashboard configurations are stored in your browser's <code class="code-inline">localStorage</code>, not in the cloud. Clearing browser storage or switching to a different browser will remove saved dashboards.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: HISTORY ═══════════════════════════ -->
+      <div class="doc-section" id="history">
+        <div class="doc-eyebrow">Features</div>
+        <h1 class="doc-h1">History</h1>
+        <p class="doc-p">The History page (<code class="code-inline">history.html</code>) has two tabs:</p>
+
+        <h2 class="doc-h2">Cleaning History tab</h2>
+        <p class="doc-p">Every completed <code class="code-inline">/clean</code> call is recorded here. Each row shows: session title, original filename, format badge, file size, row counts before → after, and the date. Expanding a row reveals three sub-tabs:</p>
+        <ul style="font-family:'DM Mono',monospace;font-size:12px;color:#aaa;line-height:2;list-style:none;padding-left:16px;margin-bottom:16px">
+          <li>→ <strong style="color:#f5f4f0">Column Context</strong> — the context strings you provided before cleaning.</li>
+          <li>→ <strong style="color:#f5f4f0">SQL Query</strong> — the DuckDB SQL generated by the AI (hidden by default, reveal on click).</li>
+          <li>→ <strong style="color:#f5f4f0">AI Reasoning</strong> — the model's own explanation of its choices (hidden by default).</li>
+        </ul>
+        <p class="doc-p">You can also <strong>Download</strong> the cleaned CSV directly from this page, or <strong>Delete</strong> the record (which also removes the stored Parquet from Supabase Storage).</p>
+
+        <h2 class="doc-h2">Dashboard History tab</h2>
+        <p class="doc-p">Lists all chart configurations you have saved in <code class="code-inline">localStorage</code>. Click <strong>Open</strong> to load the dashboard immediately with the saved settings restored.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: API ENDPOINTS ═══════════════════════════ -->
+      <div class="doc-section" id="api-endpoints">
+        <div class="doc-eyebrow">Backend API</div>
+        <h1 class="doc-h1">API Endpoints</h1>
+
+        <h2 class="doc-h2">Auth routes — <code class="code-inline">/auth/*</code></h2>
+        <table class="doc-table">
+          <thead><tr><th>Method + Path</th><th>Auth</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>POST /auth/register</td><td><span class="tag green">Public</span></td><td>Create a new account. Body: <code class="code-inline">{ email, password }</code>. Returns JWT.</td></tr>
+            <tr><td>POST /auth/login</td><td><span class="tag green">Public</span></td><td>Login. Returns JWT + <code class="code-inline">has_api_key</code> flag.</td></tr>
+            <tr><td>GET /auth/me</td><td><span class="tag yellow">JWT</span></td><td>Returns current user info: id, email, has_api_key, created_at.</td></tr>
+            <tr><td>PUT /auth/password</td><td><span class="tag yellow">JWT</span></td><td>Change password. Body: <code class="code-inline">{ current_password, new_password }</code>.</td></tr>
+            <tr><td>PUT /auth/api-key</td><td><span class="tag yellow">JWT</span></td><td>Save or update OpenRouter key. Body: <code class="code-inline">{ api_key }</code>. Stored AES-256-GCM encrypted.</td></tr>
+            <tr><td>GET /auth/api-key/status</td><td><span class="tag yellow">JWT</span></td><td>Returns <code class="code-inline">{ has_api_key: bool }</code>.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="doc-h2">Data routes</h2>
+        <table class="doc-table">
+          <thead><tr><th>Method + Path</th><th>Auth</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>POST /preview</td><td><span class="tag green">Public</span></td><td>Upload a file, returns schema + first 10 rows. No cleaning performed.</td></tr>
+            <tr><td>POST /clean</td><td><span class="tag yellow">JWT</span></td><td>Full cleaning pipeline. Accepts <code class="code-inline">file</code>, <code class="code-inline">column_contexts</code> (JSON string), optional <code class="code-inline">title</code>. Returns binary file + custom headers.</td></tr>
+            <tr><td>GET /history</td><td><span class="tag yellow">JWT</span></td><td>List all cleaning sessions for the authenticated user, newest first.</td></tr>
+            <tr><td>GET /history/{id}/download</td><td><span class="tag yellow">JWT</span></td><td>Download cleaned CSV for a given history record. Converts stored Parquet on the fly.</td></tr>
+            <tr><td>DELETE /history/{id}</td><td><span class="tag yellow">JWT</span></td><td>Delete a history record and its associated Parquet from Supabase Storage.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: AUTH ═══════════════════════════ -->
+      <div class="doc-section" id="auth">
+        <div class="doc-eyebrow">Backend API</div>
+        <h1 class="doc-h1">Authentication</h1>
+        <p class="doc-p">All protected endpoints require a <code class="code-inline">Bearer</code> token in the <code class="code-inline">Authorization</code> header:</p>
+        <pre class="code-block">Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+        <p class="doc-p">Tokens are signed with HS256 using the <code class="code-inline">JWT_SECRET</code> environment variable. The default expiry is 24 hours (<code class="code-inline">JWT_EXPIRE_HOURS</code>). After expiry, the user must log in again.</p>
+        <p class="doc-p">Passwords are hashed with <strong>Argon2id</strong> via the <code class="code-inline">argon2-cffi</code> library before storage. Plain-text passwords are never stored anywhere in the system.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: SUPPORTED FILES ═══════════════════════════ -->
+      <div class="doc-section" id="supported-files">
+        <div class="doc-eyebrow">Backend API</div>
+        <h1 class="doc-h1">Supported File Types</h1>
+        <p class="doc-p">The backend accepts the following extensions at both <code class="code-inline">/preview</code> and <code class="code-inline">/clean</code>:</p>
+        <p class="doc-p"><span class="tag yellow">.csv</span> <span class="tag yellow">.parquet</span> <span class="tag yellow">.xlsx</span> <span class="tag yellow">.xls</span> <span class="tag yellow">.db</span> <span class="tag yellow">.sqlite</span></p>
+        <p class="doc-p">Any other extension returns HTTP 415 Unsupported Media Type. There is no hard file-size limit enforced by the backend, but very large files (&gt;100 MB) will significantly increase profiling and AI prompt time. The frontend upload zone displays "max 100 MB" as a recommended guideline.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: SECURITY ═══════════════════════════ -->
+      <div class="doc-section" id="security">
+        <div class="doc-eyebrow">Security</div>
+        <h1 class="doc-h1">Security Model</h1>
+
+        <h2 class="doc-h2">Passwords</h2>
+        <p class="doc-p">User passwords are hashed with <strong>Argon2id</strong> before being stored in Supabase. Argon2id is the current recommended algorithm for password hashing. Parameters are managed by the <code class="code-inline">argon2-cffi</code> library's defaults.</p>
+
+        <h2 class="doc-h2">API key encryption</h2>
+        <p class="doc-p">OpenRouter API keys entered by users are encrypted using <strong>AES-256-GCM</strong> with a random 96-bit nonce before being stored in the database column <code class="code-inline">encrypted_api_key</code>. The master key is the <code class="code-inline">ENCRYPTION_KEY</code> environment variable (32 bytes, base64-encoded). Keys are only decrypted in memory at the moment they are needed for an AI call and are never returned to the frontend.</p>
+
+        <h2 class="doc-h2">Supabase service role key</h2>
+        <p class="doc-p">The backend uses Supabase's service role key, which bypasses Row Level Security. This key must <strong>never</strong> be included in any frontend code or public repository. It is loaded from the <code class="code-inline">.env</code> file and only exists server-side.</p>
+
+        <h2 class="doc-h2">Uploaded files</h2>
+        <p class="doc-p">Uploaded files are written to a temporary file on the server (<code class="code-inline">tempfile.NamedTemporaryFile</code>) and deleted immediately after processing in a <code class="code-inline">finally</code> block. They are not persisted to disk. Only the <em>cleaned result</em> is stored — as Parquet in Supabase Storage, in a private bucket.</p>
+
+        <h2 class="doc-h2">CORS</h2>
+        <p class="doc-p">The backend currently sets <code class="code-inline">allow_origins=["*"]</code> for development convenience. In production, restrict this to your frontend's origin.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: OPENROUTER ═══════════════════════════ -->
+      <div class="doc-section" id="openrouter">
+        <div class="doc-eyebrow">Security</div>
+        <h1 class="doc-h1">OpenRouter API Key</h1>
+        <p class="doc-p">Dafine does not bundle any AI API key. Each user must provide their own OpenRouter key in <strong>Account Settings</strong> before they can use the cleaning feature. This design means:</p>
+        <ul style="font-family:'DM Mono',monospace;font-size:12px;color:#aaa;line-height:2;list-style:none;padding-left:16px;margin-bottom:16px">
+          <li>→ You control which model you use and how much you spend.</li>
+          <li>→ The operator (you, if self-hosting) is not billed for users' AI calls.</li>
+          <li>→ Keys are encrypted with AES-256-GCM and never exposed to the browser.</li>
+        </ul>
+        <p class="doc-p">To get a key, create an account at <a href="https://openrouter.ai" target="_blank" style="color:#f0d000">openrouter.ai</a>. Free-tier models (labelled <code class="code-inline">:free</code>) work out of the box. The default model is <code class="code-inline">openai/gpt-oss-120b:free</code>.</p>
+        <p class="doc-p">You can change the default model by setting <code class="code-inline">OPENROUTER_MODEL</code> in your <code class="code-inline">.env</code>. Any model available on OpenRouter with instruction-following ability should work. Models with extended thinking / reasoning fields will populate the "AI Reasoning" section of the result.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: FAQ ═══════════════════════════ -->
+      <div class="doc-section" id="faq">
+        <div class="doc-eyebrow">Reference</div>
+        <h1 class="doc-h1">FAQ</h1>
+
+        <h2 class="doc-h2">Does Dafine send my data to OpenRouter?</h2>
+        <p class="doc-p">No. Dafine sends the AI a <strong>statistical summary</strong> of your data (column names, data types, null percentages, skewness, top-value distributions, sample values), not the raw rows. Your actual data never leaves your server. You can inspect the exact prompt by reading <code class="code-inline">backend/main.py → build_prompt()</code>.</p>
+
+        <h2 class="doc-h2">Why DuckDB instead of Pandas?</h2>
+        <p class="doc-p">DuckDB is an in-process analytical database that handles Parquet, CSV, and Excel natively with SQL. It can profile millions of rows faster than equivalent Pandas operations and requires no separate database server. The generated cleaning SQL also runs in DuckDB, making the whole pipeline stateless and simple to containerise.</p>
+
+        <h2 class="doc-h2">Can I use a different LLM?</h2>
+        <p class="doc-p">Yes — any model available on OpenRouter. Set <code class="code-inline">OPENROUTER_MODEL</code> in <code class="code-inline">.env</code>. You can also replace the OpenRouter call in <code class="code-inline">call_ai()</code> in <code class="code-inline">main.py</code> to point at any OpenAI-compatible API.</p>
+
+        <h2 class="doc-h2">What happens if the AI generates invalid SQL?</h2>
+        <p class="doc-p">DuckDB will raise an exception, which the backend catches and returns as HTTP 422 with the failed SQL included in the error message. The frontend shows the error in the red error box. You can retry — the prompt is deterministic, so adding more column context sometimes resolves ambiguity that confused the model.</p>
+
+        <h2 class="doc-h2">Is my data stored after cleaning?</h2>
+        <p class="doc-p">The <em>cleaned result</em> is stored as a Parquet file in your Supabase Storage bucket so you can download it later from the History page. The <em>original uploaded file</em> is deleted from the server immediately after processing. You can delete any cleaning session (and its stored file) from the History page at any time.</p>
+
+        <h2 class="doc-h2">Why is the outlier report shown after cleaning, not before?</h2>
+        <p class="doc-p">The outlier report runs on <code class="code-inline">cleaned_table</code> (the output) rather than the source data. This tells you what outliers remain <em>after</em> the AI's cleaning pass — which is more actionable than knowing what outliers existed before. If you want pre-cleaning outlier data, it is computed during profiling and included in the AI prompt as the <code class="code-inline">POTENTIAL_OUTLIER</code> label.</p>
+      </div>
+
+      <!-- ═══════════════════════════ SECTION: LIMITS ═══════════════════════════ -->
+      <div class="doc-section" id="limits">
+        <div class="doc-eyebrow">Reference</div>
+        <h1 class="doc-h1">Known Limits</h1>
+        <table class="doc-table">
+          <thead><tr><th>Area</th><th>Limitation</th></tr></thead>
+          <tbody>
+            <tr><td>SQLite source</td><td>Only the first table in the database is used as the source. Multi-table SQLite databases are not joined automatically.</td></tr>
+            <tr><td>XLSX</td><td>Only the first sheet is read. Requires DuckDB's <code class="code-inline">spatial</code> extension, which is auto-installed on first use.</td></tr>
+            <tr><td>Dashboard storage</td><td>Saved dashboard configurations live in browser <code class="code-inline">localStorage</code>. They are not synced to the cloud and are lost if browser data is cleared.</td></tr>
+            <tr><td>Data table preview</td><td>The dashboard's data table displays a maximum of 200 filtered rows to keep the DOM manageable. The full dataset is used for chart aggregation.</td></tr>
+            <tr><td>AI model quality</td><td>Free-tier models may occasionally produce SQL with minor syntax errors. Retry with a paid model if you encounter repeated failures.</td></tr>
+            <tr><td>Forward fill</td><td>True time-series forward fill (propagating the previous row's value) is not yet implemented in DuckDB SQL via the AI prompt. Dafine approximates it using the column mode as a fallback fill value.</td></tr>
+            <tr><td>Multi-sheet XLSX</td><td>Only the first sheet is read; additional sheets are ignored.</td></tr>
+            <tr><td>CORS</td><td><code class="code-inline">allow_origins=["*"]</code> in development. Tighten this before public deployment.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
+        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="documentation.html"   class="text-primary-container font-label-sm text-label-sm uppercase tracking-wider">Documentation</a>
+        <a href="privacy-policy.html"  class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function setActive(el) {
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // Highlight active section on scroll
+    const sections = document.querySelectorAll('.doc-section');
+    const links    = document.querySelectorAll('.sidebar-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const match = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { threshold: 0.2 });
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
