@@ -109,7 +109,7 @@
     .null-badge{font-family:var(--font-mono);font-size:9px;padding:1px 6px;background:rgba(240,160,0,.1);border:1px solid rgba(240,160,0,.3);color:#f0a000;}
     .null-badge.null-high{background:rgba(200,60,60,.1);border-color:rgba(200,60,60,.3);color:#e57373;}
     .ctx-top{font-family:var(--font-mono);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .ctx-input{width:100%;background:transparent;border:none;outline:none;padding:12px 14px;font-family:var(--font-mono);font-size:11px;color:#f5f4f0;}
+    .ctx-input{width:100%;background:transparent;border:none;outline:none;padding:12px 14px;font-family:var(--font-mono);font-size:11px;color:#101010;}
     .ctx-input::placeholder{color:var(--muted);}
     .ctx-input:focus{background:rgba(240,208,0,.03);}
     /* ── clean panel ── */
@@ -142,7 +142,7 @@
     /* ── download ── */
     .dl-row{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--gray);border:1px solid var(--border);margin-bottom:16px;}
     /* ── title input ── */
-    .title-input{width:100%;background:#131313;border:1px solid var(--border);color:#f5f4f0;font-family:var(--font-disp);font-size:14px;font-weight:700;padding:10px 14px;outline:none;transition:border-color 200ms;}
+    .title-input{width:100%;background:#131313;border:1px solid var(--border);color:#101010;font-family:var(--font-disp);font-size:14px;font-weight:700;padding:10px 14px;outline:none;transition:border-color 200ms;}
     .title-input:focus{border-color:var(--yellow);}
     .title-input::placeholder{color:var(--muted);font-weight:400;}
     /* ── outlier ── */
@@ -347,7 +347,7 @@
     <div class="c flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex flex-col items-center md:items-start gap-1">
         <span style="font-family:var(--font-disp);font-weight:700;font-size:16px">Da+fine</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">© 2025 DAFINE. DATA REFINEMENT PLATFORM.</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">© <span id="copy-year">2025</span> DAFINE. DATA REFINEMENT PLATFORM.</span>
       </div>
       <div class="flex flex-wrap justify-center gap-6">
         <a href="history.html" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase">History</a>
@@ -377,6 +377,11 @@
 
     (async function init() {
       requireAuth();
+      
+      // Update tahun copyright otomatis
+      const yearEl = document.getElementById('copy-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
       const email = localStorage.getItem('dafine_email');
       if (email) document.getElementById('nav-email').textContent = email;
       // Verify API key set
