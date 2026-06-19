@@ -354,7 +354,7 @@
 <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto">
     <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
-    <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. DATA REFINEMENT PLATFORM.</span>
+    <span class="font-label-sm text-label-sm text-text-secondary">© <span id="copy-year">2025</span> DAFINE. DATA REFINEMENT PLATFORM.</span>
   </div>
 </footer>
 
@@ -394,6 +394,9 @@ function esc(s)         { return String(s??'').replace(/&/g,'&amp;').replace(/</
   requireAuth();
   const email = localStorage.getItem('dafine_email');
   if (email) document.getElementById('nav-email').textContent = email;
+
+  const yearEl = document.getElementById('copy-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Load from URL param (comes from history.html "Open" button)
   const params = new URLSearchParams(window.location.search);
@@ -865,5 +868,6 @@ function showToast(msg, type='success') {
   _tt = setTimeout(() => t.classList.remove('visible'), 3200);
 }
 </script>
+<script src="user-guide.js"></script>
 </body>
 </html>

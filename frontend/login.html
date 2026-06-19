@@ -181,8 +181,8 @@
   <footer class="bg-surface-container-lowest border-t border-border-base mt-auto">
     <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-gap-lg max-w-container-max mx-auto gap-4">
       <div class="flex flex-col items-center md:items-start gap-1">
-        <span class="font-ui-header text-ui-header font-bold text-text-primary">Da+fine</span>
-        <span class="font-label-sm text-label-sm text-text-secondary">© 2025 DAFINE. TECHNICAL PRECISION DATA REFINEMENT.</span>
+        <span style="font-family:var(--font-disp);font-weight:700;font-size:16px">Da+fine</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">© <span id="copy-year">2025</span> DAFINE. DATA REFINEMENT PLATFORM.</span>
       </div>
       <div class="flex flex-wrap justify-center gap-6">
         <a href="privacy-policy.html" class="text-text-secondary font-label-sm text-label-sm hover:text-primary-container transition-colors uppercase tracking-wider">Privacy Policy</a>
@@ -200,6 +200,11 @@
 
     // ── Check auth on load ──
     (async function init() {
+      // 1. Update tahun copyright otomatis di login.html
+      const yearEl = document.getElementById('copy-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      // 2. Cek token dan redirect (logika bawaan kamu)
       const token = localStorage.getItem('dafine_token');
       if (token) {
         try {
@@ -212,7 +217,8 @@
           }
         } catch {}
       }
-      // Check backend alive
+      
+      // 3. Check backend alive (logika bawaan kamu)
       try {
         const r = await fetch(`${API}/`);
         document.getElementById('api-status').textContent = r.ok ? 'Online' : 'Degraded';
