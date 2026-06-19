@@ -1,8 +1,8 @@
 """
 Dafine — FastAPI Backend
 Pipeline:
-  Upload → Parse → Profile → Prompt Build → AI (OpenRouter)
-  → Parse SQL → Execute DuckDB → Convert Output → Return file + reasoning
+  Upload → Parse → Deep Profile (skewness/IQR/mode/labels) → Prompt Build (per-column instructions)
+  → AI (OpenRouter) → Parse SQL → Execute DuckDB → Convert Output → Outlier Report → Save History → Return
 """
 
 import io
@@ -37,9 +37,8 @@ VIEW_NAME = "source_table"  # Nama view tetap di DuckDB, diberitahu ke AI
 ALLOWED_EXTENSIONS = {".csv", ".parquet", ".xlsx", ".xls", ".db", ".sqlite"}
 
 # ─── APP ──────────────────────────────────────────────────────────
-app = FastAPI(title="Dafine API", version="0.2.0")
+app = FastAPI(title="Dafine API", version="0.3.0")
 
-# 1. Daftarkan Middleware secara terpisah
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -47,8 +46,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Daftarkan Router setelah middleware
 app.include_router(auth_router)
+
 
 # ─── MODELS ───────────────────────────────────────────────────────
 class ColumnInfo(BaseModel):
@@ -87,6 +86,30 @@ def load_to_duckdb(filepath: str, ext: str) -> duckdb.DuckDBPyConnection:
         raise HTTPException(status_code=422, detail=f"Unsupported file type: {ext}")
 
     return con
+
+
+def _fmt(v, max_len=80) -> str:
+    """Truncate long values agar tidak overflow prompt AI."""
+    s = str(v) if v is not None else "null"
+    return (s[:max_len] + "…") if len(s) > max_len else s
+
+
+def _col_labels(col_name: str, dtype_str: str, null_pct: float,
+                unique_count: int, total_rows: int) -> tuple[list[str], bool]:
+    """Compute labels for a column. Returns (labels, is_categorical)."""
+    labels = []
+    TIME_KW = ['date', 'time', 'year', 'month', 'day', 'timestamp', 'created', 'updated', 'period']
+
+    if null_pct > 40:
+        labels.append("HIGH_NULL")
+    if any(k in col_name.lower() for k in TIME_KW) or any(t in dtype_str for t in ['date', 'timestamp']):
+        labels.append("TIME_SERIES")
+
+    is_cat = 0 < unique_count <= 20 and unique_count < 0.05 * total_rows
+    if is_cat:
+        labels.append("LIKELY_CATEGORICAL")
+
+    return labels, is_cat
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -134,127 +157,313 @@ async def preview(file: UploadFile = File(...)):
 
 
 # ══════════════════════════════════════════════════════════════════
-# STEP 2 — PROFILING
+# STEP 2 — DEEP PROFILING
+# Skewness, IQR, median, mode, label system → dipakai untuk
+# menentukan strategi imputasi NULL per kolom secara otomatis.
 # ══════════════════════════════════════════════════════════════════
 def profile_data(con: duckdb.DuckDBPyConnection) -> dict:
     rel        = con.sql(f"SELECT * FROM {VIEW_NAME} LIMIT 0")
     col_names  = rel.columns
     dtypes     = rel.dtypes
     total_rows = con.sql(f"SELECT COUNT(*) FROM {VIEW_NAME}").fetchone()[0]
-    profiles   = []
+
+    # Exact duplicate count (seluruh kolom identik)
+    dup_count = 0
+    try:
+        all_cols_expr = ", ".join([f'"{c}"' for c in col_names])
+        total_unique  = con.sql(f"SELECT COUNT(*) FROM (SELECT DISTINCT {all_cols_expr} FROM {VIEW_NAME})").fetchone()[0]
+        dup_count     = total_rows - total_unique
+    except Exception:
+        pass
+
+    profiles = []
+    FIN_KW = ['revenue', 'cost', 'profit', 'income', 'expense', 'price', 'amount', 'total', 'balance', 'sales', 'margin']
 
     for col, dtype in zip(col_names, dtypes):
         dtype_str  = str(dtype).lower()
         is_numeric = any(t in dtype_str for t in ["int", "float", "double", "decimal", "numeric", "bigint"])
+        is_date    = any(t in dtype_str for t in ["date", "timestamp"])
 
         null_count   = con.sql(f'SELECT COUNT(*) FROM {VIEW_NAME} WHERE "{col}" IS NULL').fetchone()[0]
         null_pct     = round((null_count / total_rows) * 100, 2) if total_rows > 0 else 0
         unique_count = con.sql(f'SELECT COUNT(DISTINCT "{col}") FROM {VIEW_NAME}').fetchone()[0]
 
+        labels, is_cat = _col_labels(col, dtype_str, null_pct, unique_count, total_rows)
+
         head   = [r[0] for r in con.sql(f'SELECT "{col}" FROM {VIEW_NAME} LIMIT 5').fetchall()]
-        # rowid tidak tersedia di DuckDB view — gunakan OFFSET untuk tail
         offset = max(0, total_rows - 5)
         tail   = [r[0] for r in con.sql(f'SELECT "{col}" FROM {VIEW_NAME} LIMIT 5 OFFSET {offset}').fetchall()]
-        sample = [r[0] for r in con.sql(f'SELECT "{col}" FROM {VIEW_NAME} USING SAMPLE 5').fetchall()]
+        try:
+            sample = [r[0] for r in con.sql(f'SELECT "{col}" FROM {VIEW_NAME} USING SAMPLE 5').fetchall()]
+        except Exception:
+            sample = head
 
-        def _fmt(v, max_len=80):
-            """Truncate long values agar tidak overflow prompt AI."""
-            s = str(v) if v is not None else "null"
-            return s[:max_len] + "…" if len(s) > max_len else s
+        top_raw = con.sql(f'''
+            SELECT CAST("{col}" AS VARCHAR), COUNT(*) AS cnt
+            FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL
+            GROUP BY "{col}" ORDER BY cnt DESC LIMIT 5
+        ''').fetchall()
+        top_values = [{"value": _fmt(r[0], 50), "count": r[1], "pct": round(r[1] / total_rows * 100, 1)} for r in top_raw]
 
         profile: dict = {
-            "name": col, "type": "numeric" if is_numeric else "string",
-            "dtype": str(dtype), "total_rows": total_rows,
+            "name": col,
+            "type": "numeric" if is_numeric else ("date" if is_date else "string"),
+            "dtype": str(dtype),
+            "total_rows": total_rows,
             "null_count": null_count, "null_pct": null_pct,
             "unique_count": unique_count,
+            "labels": labels,
+            "top_values": top_values,
             "head":   [_fmt(v) for v in head],
             "tail":   [_fmt(v) for v in tail],
             "sample": [_fmt(v) for v in sample],
+            "null_strategy": None,
+            "fill_value": None,
+            "outlier_count": 0,
+            "lower_bound": None,
+            "upper_bound": None,
         }
 
-        if is_numeric:
-            stats = con.sql(f'SELECT MIN("{col}"), MAX("{col}"), AVG("{col}") FROM {VIEW_NAME}').fetchone()
-            profile.update({"min": stats[0], "max": stats[1], "avg": round(float(stats[2]), 2) if stats[2] else None})
+        # ── Numeric deep stats: median, std, skewness, IQR ─────────
+        if is_numeric and null_count < total_rows:
+            try:
+                stats = con.sql(f'''
+                    SELECT
+                        MIN("{col}"), MAX("{col}"),
+                        AVG("{col}"), STDDEV("{col}"), SKEWNESS("{col}"),
+                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "{col}"),
+                        PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY "{col}"),
+                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "{col}")
+                    FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL
+                ''').fetchone()
 
+                mn, mx, avg, std, skew, q1, median, q3 = stats
+                iqr = (q3 - q1) if (q1 is not None and q3 is not None) else None
+                lb  = (q1 - 1.5 * iqr) if iqr is not None else None
+                ub  = (q3 + 1.5 * iqr) if iqr is not None else None
+
+                outlier_count = 0
+                if lb is not None:
+                    outlier_count = con.sql(f'''
+                        SELECT COUNT(*) FROM {VIEW_NAME}
+                        WHERE "{col}" IS NOT NULL AND ("{col}" < {lb} OR "{col}" > {ub})
+                    ''').fetchone()[0]
+                    if outlier_count > 0:
+                        labels.append("POTENTIAL_OUTLIER")
+
+                profile.update({
+                    "min": mn, "max": mx,
+                    "avg":      round(float(avg), 4)    if avg    is not None else None,
+                    "std":      round(float(std), 4)    if std    is not None else None,
+                    "skewness": round(float(skew), 4)   if skew   is not None else None,
+                    "median":   round(float(median), 4) if median is not None else None,
+                    "q1":       round(float(q1), 4)     if q1     is not None else None,
+                    "q3":       round(float(q3), 4)     if q3     is not None else None,
+                    "lower_bound":   round(float(lb), 4) if lb is not None else None,
+                    "upper_bound":   round(float(ub), 4) if ub is not None else None,
+                    "outlier_count": outlier_count,
+                })
+
+                # ── NULL strategy untuk kolom numerik ──────────────
+                if null_count > 0:
+                    if unique_count <= 10 and unique_count < 0.02 * total_rows:
+                        # Numerik tapi sebenarnya kategorikal (misal kode gender 0/1/2)
+                        labels.append("NUMERIC_AS_CATEGORICAL")
+                        mode_r = con.sql(f'SELECT "{col}" FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL GROUP BY "{col}" ORDER BY COUNT(*) DESC LIMIT 1').fetchone()
+                        profile["null_strategy"] = "mode"
+                        profile["fill_value"]    = mode_r[0] if mode_r else 0
+                    elif skew is not None and abs(float(skew)) > 0.5:
+                        # Distribusi skewed → median lebih robust dari outlier
+                        profile["null_strategy"] = "median"
+                        profile["fill_value"]    = round(float(median), 4) if median is not None else 0
+                    else:
+                        # Distribusi normal-ish → mean
+                        profile["null_strategy"] = "mean"
+                        profile["fill_value"]    = round(float(avg), 4) if avg is not None else 0
+
+            except Exception as e:
+                logger.warning(f"Numeric stats failed for '{col}': {e}")
+
+        # ── String / Date stats ─────────────────────────────────────
+        else:
+            # Long text detection (kolom seperti synopsis/deskripsi)
+            try:
+                avg_len = con.sql(f'SELECT AVG(LENGTH(CAST("{col}" AS VARCHAR))) FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL').fetchone()[0]
+                if avg_len and float(avg_len) > 100:
+                    labels.append("LONG_TEXT")
+            except Exception:
+                pass
+
+            if is_cat:
+                # Mixed casing check
+                try:
+                    lower_u = con.sql(f'SELECT COUNT(DISTINCT LOWER(CAST("{col}" AS VARCHAR))) FROM {VIEW_NAME}').fetchone()[0]
+                    if lower_u < unique_count:
+                        labels.append("MIXED_CASING")
+                except Exception:
+                    pass
+
+                if null_count > 0:
+                    mode_r = con.sql(f'SELECT CAST("{col}" AS VARCHAR) FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL GROUP BY "{col}" ORDER BY COUNT(*) DESC LIMIT 1').fetchone()
+                    profile["null_strategy"] = "mode"
+                    profile["fill_value"]    = mode_r[0] if mode_r else "Unknown"
+            else:
+                # Whitespace issue check
+                try:
+                    ws = con.sql(f'SELECT COUNT(*) FROM {VIEW_NAME} WHERE "{col}" IS NOT NULL AND CAST("{col}" AS VARCHAR) != TRIM(CAST("{col}" AS VARCHAR))').fetchone()[0]
+                    if ws > 0:
+                        labels.append("WHITESPACE_ISSUE")
+                except Exception:
+                    pass
+
+                if null_count > 0:
+                    if "TIME_SERIES" in labels:
+                        profile["null_strategy"] = "forward_fill"
+                    else:
+                        profile["null_strategy"] = "constant"
+                        profile["fill_value"]    = "Unknown"
+
+        profile["labels"] = labels
         profiles.append(profile)
 
-    return {"total_rows": total_rows, "total_columns": len(col_names), "columns": profiles}
+    fin_cols = [c for c in col_names if any(k in c.lower() for k in FIN_KW)]
+
+    return {
+        "total_rows": total_rows,
+        "total_columns": len(col_names),
+        "col_names": list(col_names),
+        "columns": profiles,
+        "dup_count": dup_count,
+        "correlated_groups": {"financial": fin_cols} if len(fin_cols) >= 2 else {},
+    }
 
 
 # ══════════════════════════════════════════════════════════════════
 # STEP 3 — DYNAMIC PROMPT BUILDER
+# Instruksi cleaning per-kolom berdasarkan profiling + user context.
 # ══════════════════════════════════════════════════════════════════
 def build_prompt(profile: dict, contexts: dict = None) -> str:
-    # Antisipasi jika contexts bernilai None
     if contexts is None:
         contexts = {}
 
-    col_names = [c["name"] for c in profile["columns"]]
+    col_names   = profile["col_names"]
+    select_cols = ", ".join([f'"{c}"' for c in col_names])
+    dup_count   = profile.get("dup_count", 0)
+
+    dedup_note = (
+        f"STEP 1 — REMOVE EXACT DUPLICATES: {dup_count} duplicate rows detected. Use SELECT DISTINCT."
+        if dup_count > 0 else "No exact duplicates detected."
+    )
 
     p = f"""You are a DuckDB SQL data cleaning expert.
 
-STRICT OUTPUT RULES (violating these will break the pipeline):
-1. Output ONLY a single raw SQL statement — no markdown fences, no -- comments, no explanation text
-2. The query MUST start with: CREATE TABLE cleaned_table AS
-3. Source table: `{VIEW_NAME}` (NEVER use any other name)
-4. Output table: `cleaned_table` (MUST exist after execution)
-5. DuckDB syntax only — no stored procedures, no TEMP TABLE
+STRICT OUTPUT RULES:
+1. Output ONLY a single raw SQL statement — no markdown fences, no comments, no explanation text
+2. MUST start with: CREATE TABLE cleaned_table AS
+3. Source: `{VIEW_NAME}` — NEVER use any other table name
+4. Output: `cleaned_table` — MUST exist after execution
+5. DuckDB syntax ONLY — no rowid, no stored procedures, no TEMP TABLE
 
-DUCKDB RULES (avoid these common mistakes):
-- If using CTEs, ALL columns used in the final SELECT must be explicitly available in scope
-- If you aggregate in one CTE and need it in another, use CROSS JOIN or subquery
-- COALESCE works normally: COALESCE(col, default_value)
-- Use TRY_CAST(col AS DOUBLE) for safe numeric conversion
-- ROW_NUMBER() OVER (...) is valid in DuckDB
+DUCKDB REMINDERS:
+- Combine ops in one SELECT: LOWER(TRIM(COALESCE(col,'Unknown')))
+- ROW_NUMBER() OVER (...) is valid
+- SELECT DISTINCT removes exact duplicate rows
+- COALESCE(col, default_value) for NULL fill
+- TRY_CAST(col AS DOUBLE) for safe numeric conversion
 
-CLEANING STRATEGY:
-- Fill NULLs with sensible defaults (0 for numeric, 'Unknown' for string)
-- Deduplicate if needed using ROW_NUMBER() in a CTE, then filter WHERE rn = 1
-- Normalize string casing with LOWER() or UPPER() if inconsistent
-- Do NOT drop columns unless clearly irrelevant
-- IMPORTANT: Pay close attention to the 'User Column Context' provided for each column to understand its business rules or meaning.
+{dedup_note}
 
-EXACT SQL PATTERN TO FOLLOW (single CTE example):
+EXACT PATTERN:
 CREATE TABLE cleaned_table AS
+WITH base AS (
+  SELECT DISTINCT {select_cols} FROM {VIEW_NAME}
+)
 SELECT
   col1,
-  COALESCE(col2, 0) AS col2,
-  LOWER(TRIM(col3)) AS col3
-FROM {VIEW_NAME};
+  COALESCE(col2, <fill_value>) AS col2,
+  LOWER(TRIM(COALESCE(col3, 'Unknown'))) AS col3
+FROM base;
 
-EXACT SQL PATTERN if deduplication needed:
-CREATE TABLE cleaned_table AS
-WITH deduped AS (
-  SELECT *, ROW_NUMBER() OVER (PARTITION BY id_col ORDER BY id_col) AS rn
-  FROM {VIEW_NAME}
-)
-SELECT {", ".join([f'"{c}"' for c in col_names])}
-FROM deduped
-WHERE rn = 1;
+Dataset: {profile['total_rows']} rows × {profile['total_columns']} columns
 
-Dataset Summary:
-- Rows: {profile["total_rows"]} | Columns: {profile["total_columns"]}
-- Columns: {", ".join(col_names)}
-
-Column Profiles:
+COLUMN-BY-COLUMN CLEANING INSTRUCTIONS (follow exactly for each column):
 """
-    for i, col in enumerate(profile["columns"], 1):
-        col_name = col["name"]
-        # Ambil konteks dari user berdasarkan nama kolom
-        user_context = contexts.get(col_name, "")
-        context_line = f"\n   User Column Context: {user_context}" if user_context else ""
 
-        p += f"""
-{i}. `{col_name}` — {col["type"]} ({col["dtype"]}){context_line}
-   Null: {col["null_count"]} ({col["null_pct"]}%) | Unique: {col["unique_count"]}
-   Head:   {", ".join(col["head"])}
-   Sample: {", ".join(col["sample"])}"""
-        if col["type"] == "numeric":
-            p += f"\n   Min: {col['min']} | Max: {col['max']} | Avg: {col['avg']}"
+    for col in profile["columns"]:
+        name     = col["name"]
+        labels   = col.get("labels", [])
+        strategy = col.get("null_strategy")
+        fill_val = col.get("fill_value")
+        null_cnt = col["null_count"]
+        col_type = col["type"]
+        user_ctx = contexts.get(name, "")
+        user_ctx = user_ctx.strip() if isinstance(user_ctx, str) else ""
 
-    p += """
+        parts = []
 
-NOW OUTPUT THE SQL QUERY ONLY. Start immediately with CREATE TABLE cleaned_table AS
+        # User context — highest priority
+        if user_ctx:
+            parts.append(f"[USER CONTEXT: {user_ctx}]")
+
+        # NULL strategy dengan nilai yang sudah dihitung
+        if null_cnt > 0 and strategy:
+            if strategy == "mean":
+                parts.append(f"NULL fill → mean={fill_val} (distribution normal, skewness≈0): COALESCE(\"{name}\", {fill_val})")
+            elif strategy == "median":
+                parts.append(f"NULL fill → median={fill_val} (skewed distribution, use median not mean): COALESCE(\"{name}\", {fill_val})")
+            elif strategy == "mode":
+                fv = f"'{fill_val}'" if isinstance(fill_val, str) else str(fill_val)
+                parts.append(f"NULL fill → mode={fv} (categorical): COALESCE(\"{name}\", {fv})")
+            elif strategy == "forward_fill":
+                mode_fallback = col.get("top_values", [{}])[0].get("value", "Unknown") if col.get("top_values") else "Unknown"
+                parts.append(f"TIME_SERIES — fill NULL with most frequent value ('{mode_fallback}') as approximation: COALESCE(\"{name}\", '{mode_fallback}')")
+            elif strategy == "constant":
+                parts.append(f"NULL fill → 'Unknown': COALESCE(\"{name}\", 'Unknown')")
+        elif null_cnt == 0:
+            parts.append("no NULL")
+
+        # String transformations
+        if "LONG_TEXT" in labels:
+            parts.append("LONG_TEXT — select as-is, NO transformation")
+        else:
+            transforms = []
+            if "WHITESPACE_ISSUE" in labels:
+                transforms.append("TRIM()")
+            if "MIXED_CASING" in labels:
+                transforms.append("LOWER()")
+            if transforms:
+                parts.append(f"apply: {', '.join(transforms)}")
+
+        # Value distribution context for categorical columns
+        if "LIKELY_CATEGORICAL" in labels or "NUMERIC_AS_CATEGORICAL" in labels:
+            tv = col.get("top_values", [])
+            if tv:
+                vals_str = " | ".join([f"{t['value']}={t['pct']}%" for t in tv[:5]])
+                parts.append(f"top values: [{vals_str}]")
+
+        # Numeric stats
+        if col_type == "numeric":
+            stat_parts = []
+            if col.get("skewness") is not None:
+                stat_parts.append(f"skewness={col['skewness']}")
+            if col.get("std") is not None:
+                stat_parts.append(f"std={col['std']}")
+            if col.get("outlier_count", 0) > 0:
+                stat_parts.append(f"{col['outlier_count']} outliers outside [{col.get('lower_bound')}–{col.get('upper_bound')}]")
+            if stat_parts:
+                parts.append(" | ".join(stat_parts))
+
+        p += f"  · \"{name}\" ({col_type}/{col['dtype']}): {' | '.join(parts) if parts else 'pass through as-is'}\n"
+
+    # Correlated financial columns
+    fin = profile.get("correlated_groups", {}).get("financial", [])
+    if fin:
+        p += f"\nCORRELATED FINANCIAL COLUMNS: {', '.join(fin)}\n"
+        p += "  → Derive missing value from others (e.g., profit = revenue - cost) ONLY if all required columns available.\n"
+
+    p += f"""
+FINAL SELECT must include ALL columns in this exact order: {select_cols}
+OUTPUT THE SQL ONLY. Start with: CREATE TABLE cleaned_table AS
 """
     return p
 
@@ -263,9 +472,7 @@ NOW OUTPUT THE SQL QUERY ONLY. Start immediately with CREATE TABLE cleaned_table
 # STEP 4 — CALL AI
 # ══════════════════════════════════════════════════════════════════
 async def call_ai(prompt: str, api_key: str = None) -> dict:
-    # Gunakan api_key dari user, jika tidak ada baru gunakan global fallback
     token = api_key or OPENROUTER_API_KEY
-    
     if not token:
         raise HTTPException(status_code=400, detail="OpenRouter API Key tidak ditemukan.")
 
@@ -277,12 +484,12 @@ async def call_ai(prompt: str, api_key: str = None) -> dict:
         "model": OPENROUTER_MODEL,
         "temperature": 0.1,
         "messages": [
-            {"role": "system", "content": f"DuckDB SQL expert. Table=`{VIEW_NAME}`. Output table=`cleaned_table`. content field = raw SQL ONLY, no fences no comments. reasoning field = explanation."},
+            {"role": "system", "content": f"DuckDB SQL expert. Source=`{VIEW_NAME}`. Output=`cleaned_table`. Return raw SQL ONLY — no fences, no comments. reasoning field = explanation."},
             {"role": "user",   "content": prompt},
         ],
     }
 
-    async with httpx.AsyncClient(timeout=60) as client:
+    async with httpx.AsyncClient(timeout=90) as client:
         resp = await client.post(OPENROUTER_URL, headers=headers, json=body)
 
     if resp.status_code != 200:
@@ -290,30 +497,24 @@ async def call_ai(prompt: str, api_key: str = None) -> dict:
 
     message = resp.json()["choices"][0]["message"]
 
-    # Bersihkan content dari markdown fence
     raw_sql = message.get("content", "")
     sql = re.sub(r"```(?:sql|SQL)?", "", raw_sql).replace("```", "").strip()
 
-    # Bersihkan baris komentar (-- dan // keduanya tidak valid di DuckDB)
     cleaned_lines = []
     for ln in sql.splitlines():
         stripped = ln.strip()
-        # Buang baris yang pure comment
         if stripped.startswith("--") or stripped.startswith("//"):
             continue
-        # Buang inline // comment di akhir baris
         if "//" in ln:
             ln = ln[:ln.index("//")].rstrip()
-        if ln.strip():  # skip baris kosong hasil strip
+        if ln.strip():
             cleaned_lines.append(ln)
     sql = "\n".join(cleaned_lines).strip()
 
-    # Pastikan SQL dimulai dari CREATE TABLE (buang teks sebelumnya jika ada)
     match = re.search(r"(CREATE\s+TABLE)", sql, re.IGNORECASE)
     if match:
         sql = sql[match.start():]
 
-    # Potong setelah titik koma pertama (buang teks sampah setelah query)
     if ";" in sql:
         sql = sql[:sql.index(";") + 1]
 
@@ -372,39 +573,37 @@ def execute_and_export(con: duckdb.DuckDBPyConnection, sql: str, ext: str):
     buf.seek(0)
     return buf, ext
 
+
+# ══════════════════════════════════════════════════════════════════
+# STEP 6 — OUTLIER REPORT (post-cleaning, IQR method via DuckDB)
+# ══════════════════════════════════════════════════════════════════
 def compute_outlier_report(con: duckdb.DuckDBPyConnection, profile: dict) -> dict:
     """
-    Menghitung pencilan (outliers) menggunakan metode statistik IQR (Interquartile Range)
-    atau Tukey's Fences langsung menggunakan mesin query DuckDB.
-    
-    Metode ini bekerja pada kolom bertipe numerik dengan rumus:
-      - Interquartile Range (IQR) = Q3 - Q1
-      - Batas Bawah (Lower Bound) = Q1 - (1.5 * IQR)
-      - Batas Atas (Upper Bound)  = Q3 + (1.5 * IQR)
-      - Data dianggap outlier jika nilai < Lower Bound ATAU nilai > Upper Bound
+    Menghitung pencilan (outliers) menggunakan metode IQR / Tukey's Fences
+    pada cleaned_table (data hasil pembersihan), bukan source_table.
     """
     report = {}
-    total_rows = profile.get("total_rows", 0)
+    try:
+        total_rows = con.sql("SELECT COUNT(*) FROM cleaned_table").fetchone()[0]
+    except Exception:
+        return report
+
     if total_rows == 0:
         return report
 
-    # Lakukan iterasi untuk setiap kolom yang ada pada profil data
     for col in profile.get("columns", []):
-        # Deteksi pencilan hanya dilakukan pada kolom bertipe numerik
         if col["type"] != "numeric":
             continue
-
         col_name = col["name"]
         try:
-            # Langkah 1: Ambil nilai Q1 (25%), Median (50%), dan Q3 (75%) menggunakan quantile_cont DuckDB
-            stats_query = f"""
-                SELECT 
+            stats_query = f'''
+                SELECT
                     quantile_cont("{col_name}", 0.25) AS q1,
                     quantile_cont("{col_name}", 0.50) AS median,
                     quantile_cont("{col_name}", 0.75) AS q3
-                FROM {VIEW_NAME}
+                FROM cleaned_table
                 WHERE "{col_name}" IS NOT NULL
-            """
+            '''
             res = con.execute(stats_query).fetchone()
             if not res or res[0] is None or res[2] is None:
                 continue
@@ -414,26 +613,19 @@ def compute_outlier_report(con: duckdb.DuckDBPyConnection, profile: dict) -> dic
             lower_bound = q1 - 1.5 * iqr
             upper_bound = q3 + 1.5 * iqr
 
-            # Langkah 2: Hitung total baris data yang nilainya menembus batas (outliers)
-            count_query = f"""
-                SELECT COUNT(*) 
-                FROM {VIEW_NAME} 
+            outlier_count = con.execute(f'''
+                SELECT COUNT(*) FROM cleaned_table
                 WHERE "{col_name}" < {lower_bound} OR "{col_name}" > {upper_bound}
-            """
-            outlier_count = con.execute(count_query).fetchone()[0] or 0
+            ''').fetchone()[0] or 0
             outlier_pct = round((outlier_count / total_rows) * 100, 2)
 
-            # Langkah 3: Ambil maksimal 5 contoh data ekstrem yang terdeteksi sebagai outlier
-            sample_query = f"""
-                SELECT "{col_name}" 
-                FROM {VIEW_NAME} 
+            samples_raw = con.execute(f'''
+                SELECT "{col_name}" FROM cleaned_table
                 WHERE "{col_name}" < {lower_bound} OR "{col_name}" > {upper_bound}
                 LIMIT 5
-            """
-            samples_raw = con.execute(sample_query).fetchall()
+            ''').fetchall()
             samples = [str(r[0]) for r in samples_raw]
 
-            # Simpan hasil kalkulasi statistik ke dalam payload report berdasarkan nama kolom
             report[col_name] = {
                 "q1": round(float(q1), 2),
                 "median": round(float(median), 2),
@@ -443,13 +635,14 @@ def compute_outlier_report(con: duckdb.DuckDBPyConnection, profile: dict) -> dic
                 "upper_bound": round(float(upper_bound), 2),
                 "outlier_count": outlier_count,
                 "outlier_percentage": outlier_pct,
-                "samples": samples
+                "samples": samples,
             }
         except Exception as e:
             logger.warning(f"Gagal memproses outlier untuk kolom '{col_name}': {e}")
             continue
 
     return report
+
 
 # ══════════════════════════════════════════════════════════════════
 # MAIN ENDPOINT — /clean
@@ -482,9 +675,9 @@ async def clean(
         logger.info("STEP 1 — load_to_duckdb")
         con = load_to_duckdb(tmp_path, ext)
 
-        logger.info("STEP 2 — profile_data")
+        logger.info("STEP 2 — profile_data (deep)")
         profile = profile_data(con)
-        logger.info(f"  {profile['total_rows']} rows, {profile['total_columns']} cols")
+        logger.info(f"  {profile['total_rows']} rows, {profile['total_columns']} cols, {profile['dup_count']} dups")
 
         logger.info("STEP 3 — build_prompt")
         prompt = build_prompt(profile, contexts)
@@ -518,7 +711,7 @@ async def clean(
         }
 
         def _hdr(val: str, limit: int = 2000) -> str:
-            val = val.replace("\r\n"," ").replace("\n"," ").replace("\r"," ")
+            val = val.replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
             return val.encode("ascii", errors="replace").decode("ascii")[:limit]
 
         return StreamingResponse(
@@ -541,7 +734,6 @@ async def clean(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         os.unlink(tmp_path)
-
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -568,14 +760,13 @@ async def _save_history(
         ai_row    = sb.table("ai_output").insert({"sql_query": sql, "explanation": reasoning}).execute()
         ai_out_id = ai_row.data[0]["id"]
 
-        # 3. Upload file to Supabase Storage (needs history_id first — use ai_out_id as temp key)
-        # We insert clean_file with placeholder location, then update after we have history_id
+        # 3. clean_file (placeholder location, diisi setelah upload)
         file_row = sb.table("clean_file").insert({
             "user_id":       user_id,
             "original_name": original_name,
             "name":          clean_name,
             "type":          ext.lstrip("."),
-            "location":      "pending",  # updated below
+            "location":      "pending",
         }).execute()
         file_id = file_row.data[0]["id"]
 
@@ -615,7 +806,6 @@ async def download_history_file(
 ):
     sb = get_supabase()
 
-    # Fetch history + clean_file joined
     hist = sb.table("cleaning_history").select("*, clean_file(*)").eq("id", history_id).eq("user_id", current_user["id"]).maybe_single().execute()
     if not hist or not hist.data:
         raise HTTPException(status_code=404, detail="History not found.")
@@ -652,7 +842,6 @@ async def delete_history(
     if not hist or not hist.data:
         raise HTTPException(status_code=404, detail="History not found.")
 
-    # Hapus file dari Supabase Storage
     location = hist.data.get("clean_file", {}).get("location")
     if location and location != "pending":
         try:
@@ -660,7 +849,6 @@ async def delete_history(
         except Exception as e:
             logger.warning(f"Storage delete failed: {e}")
 
-    # Hapus dari DB (cascade akan hapus clean_file, ai_output, column_context)
     sb.table("cleaning_history").delete().eq("id", history_id).execute()
     return {"message": "History deleted successfully."}
 
@@ -679,10 +867,9 @@ async def get_history(current_user: dict = Depends(get_current_user)):
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "Dafine API", "version": "0.2.0"}
+    return {"status": "ok", "service": "Dafine API", "version": "0.3.0"}
+
 
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy"
-    }
+    return {"status": "healthy"}
